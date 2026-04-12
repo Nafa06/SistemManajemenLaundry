@@ -1,0 +1,9 @@
+{
+  "name": "sistem-manajemen-laundry",
+  "version": "1.0.0",
+  "description": "Sistem Manajemen Laundry Modern",
+  "main": "index.html",
+  "dependencies": {
+    "pg": "^8.11.0"
+  }
+}
