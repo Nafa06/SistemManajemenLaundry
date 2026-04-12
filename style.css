@@ -41,3 +41,61 @@ body {
 .animate-fade-in {
     animation: fadeIn 0.4s ease-out forwards;
 }
+
+/* style.css */
+
+/* Efek Hover Tombol Utama */
+button, .nav-item-pelanggan button, .nav-item-admin button {
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+button:hover {
+    transform: translateY(-2px);
+    filter: brightness(110%);
+}
+
+button:active {
+    transform: translateY(0);
+    scale: 0.98;
+}
+
+/* Transisi Tab yang Smooth */
+.admin-sub-view, section {
+    animation: slideUp 0.5s ease-out;
+}
+
+@keyframes slideUp {
+    from { 
+        opacity: 0; 
+        transform: translateY(20px); 
+    }
+    to { 
+        opacity: 1; 
+        transform: translateY(0); 
+    }
+}
+
+/* Card Hover Effect */
+.bg-white.rounded-2xl {
+    transition: transform 0.3s ease, box-shadow 0.3s ease;
+}
+
+.bg-white.rounded-2xl:hover {
+    transform: scale(1.01);
+    box-shadow: 0 20px 25px -5px rgb(0 0 0 / 0.1), 0 8px 10px -6px rgb(0 0 0 / 0.1);
+}
+
+/* Glassmorphism untuk Modal */
+#payModal > div {
+    backdrop-filter: blur(8px);
+    background-color: rgba(255, 255, 255, 0.95);
+}
+
+/* Custom Input Focus */
+input, select, textarea {
+    transition: all 0.2s ease;
+}
+
+input:focus, select:focus, textarea:focus {
+    transform: scale(1.01);
+}
