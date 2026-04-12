@@ -76,7 +76,7 @@
               <img src="SMLapp Icon Square.png" alt="Logo" class="w-full h-full object-contain">
           </div>
           <div>
-            <div class="text-lg font-bold">LaundryMgr</div>
+            <div class="text-lg font-bold">SMLAPP</div>
             <div class="text-[10px] uppercase font-bold opacity-60 tracking-tighter">Pro Management</div>
           </div>
         </div>
@@ -141,15 +141,164 @@
           </section>
 
           <section id="input-view" class="hidden animate-fade-in">
-             </section>
+            <div class="grid grid-cols-1 lg:grid-cols-3 gap-8">
+              <div class="lg:col-span-2 bg-white rounded-[2rem] p-8 shadow-xl shadow-gray-200/50 border border-gray-50 transition-all">
+                <div class="flex items-center justify-between mb-8">
+                  <h3 class="text-2xl font-bold text-gray-800 tracking-tight">Buat Pesanan Baru</h3>
+                  <div class="p-3 bg-sky-50 rounded-2xl text-sky-600">📥</div>
+                </div>
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                  <div class="space-y-2">
+                    <label class="text-sm font-semibold text-gray-600 ml-1">Nama Pemilik</label>
+                    <input id="lndName" class="w-full border-2 border-gray-100 rounded-2xl px-5 py-3.5 focus:border-sky-500 focus:ring-0 transition-all bg-gray-50/50" placeholder="Contoh: Naufal" />
+                  </div>
+                  <div class="space-y-2">
+                    <label class="text-sm font-semibold text-gray-600 ml-1">No. WhatsApp</label>
+                    <input id="lndContact" class="w-full border-2 border-gray-100 rounded-2xl px-5 py-3.5 focus:border-sky-500 focus:ring-0 transition-all bg-gray-50/50" placeholder="0812..." />
+                  </div>
+                  <div class="space-y-2">
+                    <label class="text-sm font-semibold text-gray-600 ml-1">Layanan</label>
+                    <select id="lndService" class="w-full border-2 border-gray-100 rounded-2xl px-5 py-3.5 focus:border-sky-500 bg-gray-50/50 transition-all cursor-pointer">
+                        <option value="Kiloan">Kiloan (Rp 8.000/kg)</option>
+                        <option value="Satuan">Satuan (Rp 15.000/pcs)</option>
+                        <option value="Karpet">Karpet (Rp 20.000/m2)</option>
+                    </select>
+                  </div>
+                  <div class="space-y-2">
+                    <label class="text-sm font-semibold text-gray-600 ml-1">Berat / Qty</label>
+                    <input id="lndQty" type="number" class="w-full border-2 border-gray-100 rounded-2xl px-5 py-3.5 focus:border-sky-500 bg-gray-50/50 transition-all" value="1" step="0.1" />
+                  </div>
+                  <div class="md:col-span-2 space-y-2">
+                    <label class="text-sm font-semibold text-gray-600 ml-1">Detail Tambahan</label>
+                    <textarea id="lndDesc" rows="3" class="w-full border-2 border-gray-100 rounded-2xl px-5 py-3.5 focus:border-sky-500 bg-gray-50/50 transition-all resize-none" placeholder="Tulis instruksi khusus jika ada..."></textarea>
+                  </div>
+                </div>
+                <div class="mt-8 flex flex-col sm:flex-row items-center gap-4 pt-6 border-t border-gray-50">
+                  <button id="submitLaundry" class="w-full sm:w-auto bg-sky-600 hover:bg-sky-700 text-white px-10 py-4 rounded-2xl font-bold shadow-lg shadow-sky-200 hover:-translate-y-1 active:translate-y-0 transition-all">Kirim Pesanan</button>
+                  <button id="calcPreview" class="w-full sm:w-auto px-6 py-4 rounded-2xl font-bold border-2 border-gray-100 text-gray-600 hover:bg-gray-50 transition-all">Preview Biaya</button>
+                  <div id="previewCost" class="text-lg font-black text-sky-600"></div>
+                </div>
+              </div>
+              <aside class="space-y-6">
+                <div class="bg-white rounded-[2rem] p-6 shadow-xl shadow-gray-200/50 border border-gray-50">
+                    <h4 class="font-bold text-gray-800 mb-4 flex items-center gap-2">
+                        <span class="relative flex h-3 w-3"><span class="animate-ping absolute inline-flex h-full w-full rounded-full bg-sky-400 opacity-75"></span><span class="relative inline-flex rounded-full h-3 w-3 bg-sky-500"></span></span>
+                        Pesanan Aktif
+                    </h4>
+                    <div id="myActiveTransactions" class="space-y-4"></div>
+                </div>
+              </aside>
+            </div>
+          </section>
 
-          <section id="status-view" class="hidden animate-fade-in"></section>
-          <section id="payment-view" class="hidden animate-fade-in"></section>
-          <section id="admin-container" class="hidden animate-fade-in"></section>
+          <section id="status-view" class="hidden animate-fade-in">
+             <div class="bg-white rounded-[2.5rem] p-8 shadow-xl border border-gray-100">
+                <h3 class="text-2xl font-bold mb-6 text-gray-800">Riwayat Cucian</h3>
+                <div id="historyTableWrap" class="overflow-x-auto"></div>
+             </div>
+          </section>
+
+          <section id="payment-view" class="hidden animate-fade-in">
+             <h3 class="text-2xl font-bold text-gray-900 mb-6">Tagihan Saya</h3>
+             <div id="customerUnpaidList" class="space-y-4 max-w-4xl"></div>
+          </section>
+
+          <section id="admin-container" class="hidden animate-fade-in space-y-8">
+            <div class="flex flex-col md:flex-row md:items-center justify-between gap-4">
+                <div class="flex gap-2 p-1.5 bg-gray-200/50 rounded-2xl w-fit">
+                    <button class="admin-tab px-6 py-3 rounded-xl text-sm font-bold transition-all bg-white text-sky-600 shadow-md">📦 Pesanan</button>
+                    <button class="admin-tab px-6 py-3 rounded-xl text-sm font-bold text-gray-500 hover:text-gray-700 transition-all">📊 Keuangan</button>
+                </div>
+            </div>
+
+            <div id="admin-manage-view" class="admin-sub-view space-y-6">
+               <div class="bg-sky-900 text-white rounded-[2rem] p-8 shadow-2xl relative overflow-hidden group">
+                  <div class="absolute -right-20 -top-20 w-64 h-64 bg-white/10 rounded-full blur-3xl group-hover:scale-150 transition-transform duration-1000"></div>
+                  <h4 class="text-lg font-bold mb-6 flex items-center gap-2">⚡ Quick Action Status</h4>
+                  <div class="grid grid-cols-1 md:grid-cols-4 gap-4 items-end relative z-10">
+                      <div class="md:col-span-1 space-y-2">
+                          <label class="text-[10px] uppercase font-black text-sky-300">Transaction ID</label>
+                          <input id="adminTransId" class="w-full bg-white/10 border border-white/20 rounded-xl px-4 py-3 text-sm focus:bg-white focus:text-gray-900 transition-all outline-none" placeholder="Klik baris tabel..." />
+                      </div>
+                      <div class="space-y-2">
+                          <label class="text-[10px] uppercase font-black text-sky-300">Laundry Progres</label>
+                          <select id="adminNewStatus" class="w-full bg-white/10 border border-white/20 rounded-xl px-4 py-3 text-sm focus:bg-white focus:text-gray-900 transition-all outline-none">
+                              <option value="NoChange">Tetap</option>
+                              <option>Ditambahkan</option><option>Dicuci</option><option>Selesai</option><option>Diambil</option>
+                          </select>
+                      </div>
+                      <div class="space-y-2">
+                          <label class="text-[10px] uppercase font-black text-sky-300">Payment Status</label>
+                          <select id="adminNewPayStatus" class="w-full bg-white/10 border border-white/20 rounded-xl px-4 py-3 text-sm focus:bg-white focus:text-gray-900 transition-all outline-none">
+                              <option value="NoChange">Tetap</option>
+                              <option value="Belum Lunas">Belum Lunas</option>
+                              <option value="Lunas">Lunas</option>
+                          </select>
+                      </div>
+                      <button id="updateStatusBtn" class="bg-white text-sky-900 px-6 py-3.5 rounded-xl font-black text-sm hover:bg-sky-50 active:scale-95 transition-all shadow-xl">Apply Updates</button>
+                  </div>
+               </div>
+               <div id="allTransactions" class="bg-white rounded-[2rem] overflow-x-auto shadow-xl border border-gray-100">
+               </div>
+            </div>
+
+            <div id="admin-payment-view" class="admin-sub-view hidden grid grid-cols-1 lg:grid-cols-3 gap-8">
+               <div class="lg:col-span-2 space-y-6">
+                  <div class="bg-white rounded-[2rem] p-8 border border-gray-100 shadow-xl">
+                      <h5 class="text-xl font-bold mb-6 text-gray-800">Verifikasi Transfer Pelanggan</h5>
+                      <div id="adminPendingList" class="space-y-4">
+                      </div>
+                  </div>
+               </div>
+               <div class="space-y-6">
+                  <div class="grid grid-cols-2 gap-4">
+                      <div class="bg-white rounded-3xl p-6 border border-amber-100 shadow-lg shadow-amber-50">
+                          <div class="text-[10px] font-black text-amber-500 uppercase mb-2">Pending</div>
+                          <div class="text-3xl font-black text-gray-800" id="pendingCount">0</div>
+                      </div>
+                      <div class="bg-white rounded-3xl p-6 border border-emerald-100 shadow-lg shadow-emerald-50">
+                          <div class="text-[10px] font-black text-emerald-500 uppercase mb-2">Success</div>
+                          <div class="text-3xl font-black text-gray-800" id="confirmedCount">0</div>
+                      </div>
+                  </div>
+               </div>
+            </div>
+          </section>
 
         </div>
       </main>
     </div>
+  </div>
+
+  <div id="payModal" class="fixed inset-0 z-[60] hidden flex items-center justify-center bg-sky-900/40 backdrop-blur-md p-4 transition-all duration-500 opacity-0">
+     <div class="bg-white/90 backdrop-blur-xl rounded-[2.5rem] shadow-2xl w-full max-w-md overflow-hidden transform scale-90 transition-all duration-500 border border-white/50">
+        <div class="px-8 py-6 flex justify-between items-center border-b border-gray-100">
+            <h3 class="text-xl font-bold text-gray-800">Verifikasi Transfer</h3>
+            <button id="closePayModal" class="w-10 h-10 flex items-center justify-center rounded-full hover:bg-rose-50 text-rose-500 transition-colors">&times;</button>
+        </div>
+        <div class="p-8">
+            <div class="bg-sky-600 rounded-3xl p-6 text-white mb-8 shadow-xl shadow-sky-200 relative overflow-hidden">
+                <div class="text-xs opacity-80 uppercase font-bold mb-1">Total Tagihan</div>
+                <div class="text-3xl font-black mb-1" id="modalPayTotal">Rp 0</div>
+                <div class="text-[10px] font-mono opacity-60" id="modalPayId">TRANS-XXXX</div>
+                <div class="absolute -right-4 -bottom-4 text-6xl opacity-10 rotate-12">💸</div>
+            </div>
+            <div class="space-y-5">
+                <div class="space-y-2">
+                    <label class="text-xs font-bold text-gray-500 ml-1">Metode Transfer</label>
+                    <select id="payMethodInput" class="w-full bg-gray-50 border-0 rounded-2xl px-5 py-4 text-sm font-semibold focus:ring-2 focus:ring-sky-500 transition-all">
+                        <option value="Transfer Bank (BCA)">Bank BCA</option>
+                        <option value="QRIS">QRIS All Payment</option>
+                    </select>
+                </div>
+                <div class="space-y-2">
+                    <label class="text-xs font-bold text-gray-500 ml-1">Nama Pengirim</label>
+                    <input id="paySenderInput" class="w-full bg-gray-50 border-0 rounded-2xl px-5 py-4 text-sm font-semibold focus:ring-2 focus:ring-sky-500 transition-all" placeholder="Nama sesuai rekening..." />
+                </div>
+            </div>
+            <button id="submitPaymentProof" class="w-full bg-gray-900 hover:bg-black text-white font-bold py-5 rounded-2xl mt-8 transition-all active:scale-95 shadow-2xl shadow-gray-300">Kirim Bukti Pembayaran</button>
+        </div>
+     </div>
   </div>
 
   <script src="app.js" defer></script>
