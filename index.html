@@ -301,6 +301,23 @@
      </div>
   </div>
 
+  <div id="logModal" class="fixed inset-0 z-[70] hidden flex items-center justify-center bg-gray-900/60 backdrop-blur-sm p-4 transition-all duration-300 opacity-0">
+     <div class="bg-white rounded-[2rem] shadow-2xl w-full max-w-lg overflow-hidden transform scale-90 transition-all duration-300">
+        <div class="px-6 py-5 flex justify-between items-center border-b border-gray-100 bg-gray-50">
+            <div>
+                <h3 class="text-lg font-bold text-gray-800">Riwayat Pesanan</h3>
+                <div class="text-xs text-gray-500 font-mono mt-1" id="logModalId">TRX-0000</div>
+            </div>
+            <button id="closeLogModal" class="w-8 h-8 flex items-center justify-center rounded-full hover:bg-rose-100 text-rose-500 transition-colors">&times;</button>
+        </div>
+        <div class="p-6 max-h-[60vh] overflow-y-auto bg-gray-50/30">
+            <div id="logModalContent" class="space-y-4">
+                <div class="animate-pulse flex space-x-4"><div class="flex-1 space-y-4 py-1"><div class="h-2 bg-slate-200 rounded"></div><div class="h-2 bg-slate-200 rounded"></div></div></div>
+            </div>
+        </div>
+     </div>
+  </div>
+
   <script src="app.js" defer></script>
 </body>
 </html>
