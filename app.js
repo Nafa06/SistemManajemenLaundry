@@ -28,19 +28,21 @@ function todayISO(){ return new Date().toISOString().slice(0,10); }
 function fmtIDR(v){ return new Intl.NumberFormat('id-ID',{style:'currency',currency:'IDR',minimumFractionDigits:0}).format(v); }
 
 // SIMULASI API ASYNC (Siap diganti ke fetch API Neon nantinya)
-async function fetchTrans(){ 
-    return new Promise(resolve => {
-        let data = JSON.parse(localStorage.getItem('SIML_trans'));
-        if(!data){
-            data = [
-                {id:'TRANS-101',service:'Kiloan',qty:4,desc:'Baju Harian',date:todayISO(),by:'pelanggan',status:'Selesai',status_payment:'Belum Lunas',total:32000},
-                {id:'TRANS-102',service:'Satuan',qty:2,desc:'Jas',date:todayISO(),by:'pelanggan',status:'Dicuci',status_payment:'Belum Lunas',total:30000}
-            ];
-            localStorage.setItem('SIML_trans', JSON.stringify(data));
-        }
-        resolve(data);
-    });
+// app.js - Ganti fungsi fetchTrans lama dengan ini
+async function fetchTrans() {
+    try {
+        const response = await fetch('/.netlify/functions/api'); // Memanggil backend real
+        if (!response.ok) throw new Error('Gagal mengambil data');
+        const data = await response.json();
+        return data; 
+    } catch (err) {
+        console.error("Error:", err);
+        return []; // Jika gagal, return array kosong (bukan data dummy)
+    }
 }
+
+// Hapus atau beri komentar (comment out) bagian localStorage.setItem di fungsi login
+// Agar aplikasi benar-benar bersih dari data lokal.
 async function saveTrans(v){ 
     return new Promise(resolve => {
         localStorage.setItem('SIML_trans', JSON.stringify(v));
@@ -290,10 +292,6 @@ async function renderAdminPayment(){
     el('#adminPendingList').innerHTML = pend.length ? `<table class="w-full text-sm"><thead class="bg-gray-50 text-left"><tr><th class="p-3">ID</th><th class="p-3">Total</th><th class="p-3">Catatan</th><th class="p-3">Aksi</th></tr></thead><tbody>
     ${pend.map(x=>`<tr class="border-b"><td class="p-3 font-mono text-xs">${x.id}<br><span class="text-gray-400">${x.by}</span></td><td class="p-3 font-bold">${fmtIDR(x.total)}</td><td class="p-3 text-xs"><div class="font-bold text-sky-600">${x.requestedPayMethod}</div><div class="text-gray-500">${x.payNote}</div></td><td class="p-3 flex gap-2"><button onclick="admDecide('${x.id}',true)" class="bg-green-100 text-green-700 px-2 py-1 rounded text-xs font-bold hover:bg-green-200">Terima</button><button onclick="admDecide('${x.id}',false)" class="bg-red-100 text-red-700 px-2 py-1 rounded text-xs font-bold hover:bg-red-200">Tolak</button></td></tr>`).join('')}</tbody></table>` : `<div class="p-4 text-center text-gray-400 italic">Tidak ada request baru</div>`;
     
-    // Select dropdown
-    const sel = el('#adminPayTransId');
-    sel.innerHTML = '<option value="">-- Pilih Transaksi --</option>' + all.filter(x=>x.status_payment!=='Lunas').map(x=>`<option value="${x.id}">${x.id} - ${x.by} (${fmtIDR(x.total)})</option>`).join('');
-
     // Render Chart
     const totalsByService = all.reduce((acc, curr) => {
         acc[curr.service] = (acc[curr.service] || 0) + curr.total;
@@ -335,8 +333,6 @@ window.admDecide = async function(id, approve){
     renderAdminPayment();
 };
 
-el('#confirmPaymentAdmin').onclick = () => { const id=el('#adminPayTransId').value; if(id) admDecide(id, true); };
-el('#rejectPaymentAdmin').onclick = () => { const id=el('#adminPayTransId').value; if(id) admDecide(id, false); };
 el('#resetSeed').onclick = () => { if(confirm('Reset seluruh data?')){ localStorage.removeItem('SIML_trans'); location.reload(); }};
 
 async function updateBadges(){

@@ -3,291 +3,277 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <title>SI Manajemen Laundry – Unified Theme</title>
+  <title>SI Manajemen Laundry – Professional Edition</title>
+  
   <script src="https://cdn.tailwindcss.com"></script>
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
   
+  <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
   <link rel="stylesheet" href="style.css">
   
   <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
+  <style>
+    /* Tambahan inline untuk efek loading pulse yang lebih halus */
+    .skeleton {
+      background: linear-gradient(90deg, #f0f0f0 25%, #e0e0e0 50%, #f0f0f0 75%);
+      background-size: 200% 100%;
+      animation: loading 1.5s infinite;
+    }
+    @keyframes loading {
+      0% { background-position: 200% 0; }
+      100% { background-position: -200% 0; }
+    }
+  </style>
 </head>
-<body class="min-h-screen bg-gray-50 text-gray-800">
+<body class="min-h-screen bg-gray-50 text-gray-800 selection:bg-sky-100 selection:text-sky-600">
 
   <section id="login-view" class="fixed inset-0 z-50 bg-gray-100 flex items-center justify-center p-4 hidden">
-    <div class="bg-white rounded-3xl shadow-2xl flex overflow-hidden max-w-5xl w-full min-h-[600px]">
+    <div class="bg-white rounded-3xl shadow-2xl flex overflow-hidden max-w-5xl w-full min-h-[600px] transform transition-all">
       <div class="hidden md:flex md:w-1/2 login-pattern bg-gradient-to-br from-sky-500 to-indigo-600 p-12 flex-col justify-between text-white relative overflow-hidden">
-        <div class="absolute top-0 right-0 -mr-20 -mt-20 w-64 h-64 bg-white opacity-10 rounded-full blur-3xl"></div>
-        <div class="absolute bottom-0 left-0 -ml-20 -mb-20 w-80 h-80 bg-indigo-900 opacity-20 rounded-full blur-3xl"></div>
+        <div class="absolute top-0 right-0 -mr-20 -mt-20 w-64 h-64 bg-white opacity-10 rounded-full blur-3xl animate-pulse"></div>
         <div class="relative z-10">
             <h1 class="text-4xl font-bold mb-4 leading-tight">Sistem Manajemen<br>Laundry Modern</h1>
-            <p class="text-sky-100 text-lg font-light opacity-90">Kelola transaksi, pantau status cucian, dan laporan keuangan dalam satu platform yang elegan.</p>
+            <p class="text-sky-100 text-lg font-light opacity-90">Efisiensi operasional dengan sentuhan teknologi mutakhir.</p>
         </div>
         <div class="relative z-10 text-sm opacity-70">&copy; 2026 Clean Minimalist System</div>
       </div>
       <div class="w-full md:w-1/2 p-8 md:p-16 flex flex-col justify-center bg-white relative">
         <div class="mb-10">
             <h2 class="text-3xl font-bold text-gray-900 mb-2">Selamat Datang</h2>
-            <p class="text-gray-500">Silakan masukkan detail akun Anda untuk masuk.</p>
+            <p class="text-gray-500">Kelola bisnis laundry Anda dengan lebih profesional.</p>
         </div>
         <div class="space-y-6">
-            <div>
-                <label class="block text-sm font-medium text-gray-700 mb-2">Username</label>
-                <input id="loginUser" type="text" class="w-full px-4 py-3.5 rounded-xl border border-gray-200 bg-gray-50 focus:bg-white focus:border-sky-500 focus:ring-4 focus:ring-sky-500/10 transition outline-none" placeholder="Masukkan username" />
+            <div class="group">
+                <label class="block text-sm font-medium text-gray-700 mb-2 transition-colors group-focus-within:text-sky-600">Username</label>
+                <input id="loginUser" type="text" class="w-full px-4 py-3.5 rounded-xl border border-gray-200 bg-gray-50 focus:bg-white focus:border-sky-500 focus:ring-4 focus:ring-sky-500/10 transition-all outline-none" placeholder="Username" />
+            </div>
+            <div class="group">
+                <label class="block text-sm font-medium text-gray-700 mb-2 transition-colors group-focus-within:text-sky-600">Password</label>
+                <input id="loginPass" type="password" class="w-full px-4 py-3.5 rounded-xl border border-gray-200 bg-gray-50 focus:bg-white focus:border-sky-500 focus:ring-4 focus:ring-sky-500/10 transition-all outline-none" placeholder="••••••••" />
             </div>
             <div>
-                <label class="block text-sm font-medium text-gray-700 mb-2">Password</label>
-                <input id="loginPass" type="password" class="w-full px-4 py-3.5 rounded-xl border border-gray-200 bg-gray-50 focus:bg-white focus:border-sky-500 focus:ring-4 focus:ring-sky-500/10 transition outline-none" placeholder="Masukkan password" />
-            </div>
-            <div>
-                <label class="block text-sm font-medium text-gray-700 mb-2">Masuk Sebagai</label>
-                <select id="loginRole" class="w-full px-4 py-3.5 rounded-xl border border-gray-200 bg-gray-50 focus:bg-white focus:border-sky-500 focus:ring-4 focus:ring-sky-500/10 transition outline-none">
+                <label class="block text-sm font-medium text-gray-700 mb-2">Role</label>
+                <select id="loginRole" class="w-full px-4 py-3.5 rounded-xl border border-gray-200 bg-gray-50 focus:bg-white focus:border-sky-500 transition-all outline-none">
                     <option>Pelanggan</option>
                     <option>Admin</option>
                 </select>
             </div>
-            <button id="loginBtn" class="w-full bg-gradient-to-r from-sky-600 to-indigo-600 hover:from-sky-700 hover:to-indigo-700 text-white font-semibold py-4 rounded-xl shadow-lg hover:shadow-xl hover:-translate-y-0.5 transition mt-4">Masuk ke Dashboard</button>
-        </div>
-        <div class="mt-8 text-center">
-            <div class="inline-block bg-sky-50 border border-sky-100 rounded-lg px-4 py-2">
-                <p class="text-xs text-sky-700 font-medium">Demo: <span class="font-bold">admin / 123</span> atau <span class="font-bold">pelanggan / 123</span></p>
-            </div>
+            <button id="loginBtn" class="w-full bg-gradient-to-r from-sky-600 to-indigo-600 hover:from-sky-700 hover:to-indigo-700 text-white font-semibold py-4 rounded-xl shadow-lg hover:shadow-sky-200 hover:scale-[1.02] active:scale-95 transition-all duration-300">Masuk Sekarang</button>
         </div>
       </div>
     </div>
   </section>
 
   <div class="flex min-h-screen">
-    <aside id="sidebar" class="w-64 bg-gradient-to-br from-sky-500 to-indigo-600 border-r border-white/10 hidden md:flex flex-col text-white">
-      <div class="px-6 py-6 border-b border-white/10">
+    <aside id="sidebar" class="w-64 bg-gradient-to-br from-sky-600 to-indigo-700 border-r border-white/10 hidden md:flex flex-col text-white transition-all duration-500">
+      <div class="px-6 py-8 border-b border-white/10">
         <div class="flex items-center gap-3">
-          <div class="p-1.5 bg-white rounded-xl shadow-lg text-sky-600 font-bold px-3">L</div>
+          <div class="p-2 bg-white rounded-2xl shadow-xl text-sky-600 font-black text-xl transform hover:rotate-12 transition-transform cursor-pointer">L</div>
           <div>
-            <div class="text-lg font-bold text-white">Laundry Mgr</div>
-            <div class="text-xs text-sky-100 font-medium opacity-80">Sistem Manajemen</div>
+            <div class="text-lg font-bold tracking-tight">LaundryMgr</div>
+            <div class="text-[10px] uppercase tracking-widest text-sky-200 font-bold opacity-70">Professional Tool</div>
           </div>
         </div>
       </div>
       <nav class="flex-1 px-4 py-6">
-        <ul class="space-y-2">
-          <li class="nav-item-pelanggan"><button data-view="input-view" class="w-full text-left px-3 py-2.5 rounded-lg font-medium text-sky-50 hover:bg-white/20 hover:text-white focus:outline-none transition-all duration-200">Input Cucian</button></li>
-          <li class="nav-item-pelanggan"><button data-view="status-view" class="w-full text-left px-3 py-2.5 rounded-lg font-medium text-sky-50 hover:bg-white/20 hover:text-white focus:outline-none transition-all duration-200">Cek Status</button></li>
-          <li class="nav-item-pelanggan"><button data-view="payment-view" class="w-full text-left px-3 py-2.5 rounded-lg font-medium text-sky-50 hover:bg-white/20 hover:text-white focus:outline-none transition-all duration-200">Pembayaran <span id="payBadge" class="hidden ml-2 bg-red-500 text-white text-[10px] px-1.5 py-0.5 rounded-full shadow-sm">!</span></button></li>
-          
-          <li class="nav-item-admin hidden"><button data-view="admin-container" class="w-full text-left px-3 py-2.5 rounded-lg font-medium text-sky-50 hover:bg-white/20 hover:text-white focus:outline-none transition-all duration-200">Panel Admin</button></li>
+        <ul class="space-y-3">
+          <li class="nav-item-pelanggan"><button data-view="input-view" class="w-full flex items-center gap-3 px-4 py-3 rounded-xl font-medium transition-all duration-300 hover:bg-white/10 group">
+            <span class="opacity-70 group-hover:opacity-100 transition-opacity">📥</span> Input Cucian
+          </button></li>
+          <li class="nav-item-pelanggan"><button data-view="status-view" class="w-full flex items-center gap-3 px-4 py-3 rounded-xl font-medium transition-all duration-300 hover:bg-white/10 group">
+            <span class="opacity-70 group-hover:opacity-100 transition-opacity">🔍</span> Cek Status
+          </button></li>
+          <li class="nav-item-pelanggan"><button data-view="payment-view" class="w-full flex items-center justify-between px-4 py-3 rounded-xl font-medium transition-all duration-300 hover:bg-white/10 group">
+            <div class="flex items-center gap-3"><span class="opacity-70 group-hover:opacity-100 transition-opacity">💳</span> Pembayaran</div>
+            <span id="payBadge" class="hidden bg-rose-500 text-[10px] px-2 py-0.5 rounded-full animate-bounce">0</span>
+          </button></li>
+          <li class="nav-item-admin hidden"><button data-view="admin-container" class="w-full flex items-center gap-3 px-4 py-3 rounded-xl font-medium transition-all duration-300 hover:bg-white/10 group">
+            <span class="opacity-70 group-hover:opacity-100 transition-opacity">⚙️</span> Panel Kontrol
+          </button></li>
         </ul>
       </nav>
-      <div class="px-4 py-4 border-t border-white/10 bg-black/10">
-        <div id="userChip" class="hidden flex items-center gap-3 bg-white/10 border border-white/10 px-3 py-2.5 rounded-lg text-sm text-white shadow-sm mb-3 backdrop-blur-sm"></div>
-        <button id="logoutBtn" class="hidden w-full text-sm font-medium py-2.5 px-3 rounded-lg border border-red-200/30 text-red-100 hover:bg-red-500/30 transition-colors">Logout</button>
+      <div class="px-4 py-6 border-t border-white/10 bg-black/5">
+        <div id="userChip" class="flex items-center gap-3 bg-white/10 border border-white/10 px-4 py-3 rounded-2xl text-xs backdrop-blur-md mb-4 animate-fade-in"></div>
+        <button id="logoutBtn" class="w-full py-3 rounded-xl border border-rose-300/20 text-rose-100 text-sm hover:bg-rose-500/20 transition-all active:scale-95">Logout Account</button>
       </div>
     </aside>
 
-    <div class="flex-1 flex flex-col h-screen">
-      <header class="bg-gradient-to-r from-sky-500 to-indigo-600 border-b border-white/10 sticky top-0 z-30 shrink-0 text-white shadow-md">
-        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div class="flex items-center justify-between h-16">
-            <div class="flex items-center gap-6">
-              <button id="menuToggle" class="md:hidden p-2 rounded-md hover:bg-white/20 text-white">
+    <div class="flex-1 flex flex-col h-screen overflow-hidden">
+      <header class="bg-white/80 backdrop-blur-md border-b border-gray-100 sticky top-0 z-30 shrink-0 shadow-sm">
+        <div class="max-w-7xl mx-auto px-6 h-16 flex items-center justify-between">
+          <div class="flex items-center gap-4">
+            <button id="menuToggle" class="md:hidden p-2 rounded-xl hover:bg-gray-100">
                 <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16"/></svg>
-              </button>
-              <div class="text-xl font-bold text-white tracking-wide">Dashboard</div>
-              <div class="hidden sm:block text-sm text-sky-100 border-l border-white/20 pl-4 opacity-80">Demo System v1.0</div>
-            </div>
-            <div class="flex items-center gap-3">
-              <div id="userChipTop" class="hidden text-sm font-medium text-sky-50"></div>
-              <div class="w-9 h-9 rounded-full bg-white/20 border border-white/30 flex items-center justify-center text-white text-sm font-bold shadow-sm backdrop-blur-md">U</div>
-            </div>
+            </button>
+            <h2 class="text-xl font-bold bg-gradient-to-r from-gray-800 to-gray-500 bg-clip-text text-transparent" id="currentViewTitle">Ringkasan</h2>
+          </div>
+          <div class="flex items-center gap-4">
+            <div id="userChipTop" class="hidden md:block text-sm font-semibold text-gray-600"></div>
+            <div class="w-10 h-10 rounded-2xl bg-gradient-to-tr from-sky-400 to-indigo-500 shadow-lg shadow-sky-100 flex items-center justify-center text-white font-bold text-lg">N</div>
           </div>
         </div>
       </header>
 
-      <main class="flex-1 overflow-auto p-6 bg-gray-50/80">
+      <main class="flex-1 overflow-auto p-6 space-y-8">
         <div class="max-w-7xl mx-auto">
 
-          <section id="input-view" class="hidden animate-fade-in pb-10">
-            <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
-              <div class="lg:col-span-2 bg-white rounded-2xl p-6 shadow-sm border border-gray-100">
-                <div class="flex items-center justify-between mb-6 pb-4 border-b border-gray-50">
-                  <div>
-                    <h3 class="text-lg font-bold text-gray-800">Input Data Cucian</h3>
-                    <div class="text-sm text-gray-500 mt-1">Isi formulir untuk mencatat transaksi baru</div>
+          <section id="input-view" class="hidden animate-fade-in">
+            <div class="grid grid-cols-1 lg:grid-cols-3 gap-8">
+              <div class="lg:col-span-2 bg-white rounded-[2rem] p-8 shadow-xl shadow-gray-200/50 border border-gray-50 transition-all hover:shadow-2xl hover:shadow-sky-100/50">
+                <div class="flex items-center justify-between mb-8">
+                  <h3 class="text-2xl font-bold text-gray-800 tracking-tight">Buat Pesanan Baru</h3>
+                  <div class="p-3 bg-sky-50 rounded-2xl text-sky-600">📥</div>
+                </div>
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                  <div class="space-y-2">
+                    <label class="text-sm font-semibold text-gray-600 ml-1">Nama Pemilik</label>
+                    <input id="lndName" class="w-full border-2 border-gray-100 rounded-2xl px-5 py-3.5 focus:border-sky-500 focus:ring-0 transition-all bg-gray-50/50" placeholder="Contoh: Naufal" />
+                  </div>
+                  <div class="space-y-2">
+                    <label class="text-sm font-semibold text-gray-600 ml-1">No. WhatsApp</label>
+                    <input id="lndContact" class="w-full border-2 border-gray-100 rounded-2xl px-5 py-3.5 focus:border-sky-500 focus:ring-0 transition-all bg-gray-50/50" placeholder="0812..." />
+                  </div>
+                  <div class="space-y-2">
+                    <label class="text-sm font-semibold text-gray-600 ml-1">Layanan</label>
+                    <select id="lndService" class="w-full border-2 border-gray-100 rounded-2xl px-5 py-3.5 focus:border-sky-500 bg-gray-50/50 transition-all cursor-pointer">
+                        <option value="Kiloan">Kiloan (Rp 8.000/kg)</option>
+                        <option value="Satuan">Satuan (Rp 15.000/pcs)</option>
+                        <option value="Karpet">Karpet (Rp 20.000/m2)</option>
+                    </select>
+                  </div>
+                  <div class="space-y-2">
+                    <label class="text-sm font-semibold text-gray-600 ml-1">Berat / Qty</label>
+                    <input id="lndQty" type="number" class="w-full border-2 border-gray-100 rounded-2xl px-5 py-3.5 focus:border-sky-500 bg-gray-50/50 transition-all" value="1" step="0.1" />
+                  </div>
+                  <div class="md:col-span-2 space-y-2">
+                    <label class="text-sm font-semibold text-gray-600 ml-1">Detail Tambahan</label>
+                    <textarea id="lndDesc" rows="3" class="w-full border-2 border-gray-100 rounded-2xl px-5 py-3.5 focus:border-sky-500 bg-gray-50/50 transition-all resize-none" placeholder="Tulis instruksi khusus jika ada..."></textarea>
                   </div>
                 </div>
-                <div class="grid grid-cols-1 md:grid-cols-2 gap-5">
-                  <div><label class="block text-sm font-medium text-gray-700 mb-1.5">Nama Pelanggan</label><input id="lndName" class="w-full border border-gray-200 rounded-lg px-4 py-2.5 outline-none transition" placeholder="Nama pemilik" /></div>
-                  <div><label class="block text-sm font-medium text-gray-700 mb-1.5">Kontak (HP)</label><input id="lndContact" class="w-full border border-gray-200 rounded-lg px-4 py-2.5 outline-none transition" placeholder="08xx..." /></div>
-                  <div><label class="block text-sm font-medium text-gray-700 mb-1.5">Jenis Layanan</label><select id="lndService" class="w-full border border-gray-200 rounded-lg px-4 py-2.5 bg-white"><option value="Kiloan">Kiloan (Rp 8.000/kg)</option><option value="Satuan">Satuan (Rp 15.000/pcs)</option><option value="Karpet">Karpet (Rp 20.000/m2)</option></select></div>
-                  <div><label class="block text-sm font-medium text-gray-700 mb-1.5">Berat / Jumlah</label><input id="lndQty" type="number" class="w-full border border-gray-200 rounded-lg px-4 py-2.5" value="1" min="0.1" step="0.1" /></div>
-                  <div class="md:col-span-2"><label class="block text-sm font-medium text-gray-700 mb-1.5">Keterangan Tambahan</label><textarea id="lndDesc" rows="3" class="w-full border border-gray-200 rounded-lg px-4 py-2.5 resize-none" placeholder="Contoh: 3 kemeja..."></textarea></div>
-                </div>
-                <div class="mt-6 flex items-center gap-3 pt-4 border-t border-gray-50">
-                  <button id="submitLaundry" class="bg-sky-600 hover:bg-sky-700 text-white px-6 py-2.5 rounded-lg font-semibold shadow-md transition">Simpan Transaksi</button>
-                  <button id="calcPreview" class="border border-gray-200 text-gray-600 hover:bg-gray-50 px-4 py-2.5 rounded-lg font-medium transition">Preview Biaya</button>
-                  <div id="previewCost" class="text-sm font-bold text-sky-700 ml-2"></div>
+                <div class="mt-8 flex flex-col sm:flex-row items-center gap-4 pt-6 border-t border-gray-50">
+                  <button id="submitLaundry" class="w-full sm:w-auto bg-sky-600 hover:bg-sky-700 text-white px-10 py-4 rounded-2xl font-bold shadow-lg shadow-sky-200 hover:scale-105 active:scale-95 transition-all">Kirim Pesanan</button>
+                  <button id="calcPreview" class="w-full sm:w-auto px-6 py-4 rounded-2xl font-bold border-2 border-gray-100 text-gray-600 hover:bg-gray-50 transition-all">Preview Biaya</button>
+                  <div id="previewCost" class="text-lg font-black text-sky-600"></div>
                 </div>
               </div>
-              <aside class="bg-white rounded-2xl p-6 shadow-sm border border-gray-100 h-fit">
-                <h4 class="font-bold text-gray-800 mb-4 flex items-center gap-2"><span class="w-2 h-2 rounded-full bg-green-500"></span> Transaksi Terbaru</h4>
-                <div id="myActiveTransactions" class="text-sm text-gray-600"></div>
+              <aside class="space-y-6">
+                <div class="bg-white rounded-[2rem] p-6 shadow-xl shadow-gray-200/50 border border-gray-50">
+                    <h4 class="font-bold text-gray-800 mb-4 flex items-center gap-2">
+                        <span class="relative flex h-3 w-3"><span class="animate-ping absolute inline-flex h-full w-full rounded-full bg-sky-400 opacity-75"></span><span class="relative inline-flex rounded-full h-3 w-3 bg-sky-500"></span></span>
+                        Aktivitas Terakhir
+                    </h4>
+                    <div id="myActiveTransactions" class="space-y-4">
+                        <div class="skeleton h-16 w-full rounded-2xl"></div>
+                    </div>
+                </div>
               </aside>
             </div>
           </section>
 
-          <section id="status-view" class="hidden mt-6 animate-fade-in pb-10">
-            <div class="bg-white rounded-2xl p-6 shadow-sm border border-gray-100">
-              <div class="mb-6"><h3 class="text-lg font-bold text-gray-800">Cek Status Cucian</h3></div>
-              <div class="grid grid-cols-1 md:grid-cols-3 gap-4 bg-gray-50 p-4 rounded-xl border border-gray-100">
-                <div><label class="block text-xs font-semibold text-gray-500 uppercase mb-1.5">Cari</label><input id="searchTrans" class="w-full border border-gray-200 rounded-lg px-3 py-2 text-sm" placeholder="ID Transaksi..." /></div>
-                <div><label class="block text-xs font-semibold text-gray-500 uppercase mb-1.5">Status</label><select id="filterStatus" class="w-full border border-gray-200 rounded-lg px-3 py-2 text-sm bg-white"><option value="">Semua</option><option>Ditambahkan</option><option>Dicuci</option><option>Selesai</option></select></div>
-                <div><label class="block text-xs font-semibold text-gray-500 uppercase mb-1.5">Tanggal</label><input id="filterDate" type="date" class="w-full border border-gray-200 rounded-lg px-3 py-2 text-sm" /></div>
-              </div>
-              <div id="historyTableWrap" class="mt-6 border rounded-xl overflow-hidden"></div>
-            </div>
-          </section>
-
-          <section id="payment-view" class="hidden animate-fade-in pb-10">
-            <div class="flex items-center justify-between mb-8">
-              <div>
-                <h3 class="text-2xl font-bold text-gray-900">Pembayaran</h3>
-                <p class="text-gray-500">Kelola tagihan dan konfirmasi pembayaran Anda.</p>
-              </div>
-            </div>
-            <div class="grid grid-cols-1 lg:grid-cols-3 gap-8">
-              <div class="lg:col-span-2 space-y-6" id="customerUnpaidList">
-                <div class="p-12 text-center text-gray-400 bg-white rounded-2xl border border-dashed border-gray-200">Memuat data tagihan...</div>
-              </div>
-              <div class="space-y-6">
-                 <div class="bg-gradient-to-br from-gray-900 to-gray-800 rounded-2xl p-6 text-white shadow-xl relative overflow-hidden">
-                    <div class="relative z-10">
-                        <div class="text-gray-400 text-sm mb-1">Rekening Transfer</div>
-                        <div class="text-2xl font-mono font-bold tracking-widest mb-4">5432 0098 1122</div>
-                        <div class="flex justify-between items-end">
-                            <div><div class="text-xs text-gray-400">Atas Nama</div><div class="font-medium">Laundry Sejahtera</div></div>
-                            <div class="font-bold text-xl italic opacity-80">BCA</div>
-                        </div>
-                    </div>
-                 </div>
-                 <div class="bg-white p-6 rounded-2xl shadow-sm border border-gray-100">
-                    <h4 class="font-bold text-gray-800 mb-4">Cara Pembayaran</h4>
-                    <ul class="space-y-3 text-sm text-gray-600">
-                        <li class="flex gap-3"><span class="w-6 h-6 rounded-full bg-sky-100 text-sky-600 flex items-center justify-center text-xs font-bold shrink-0">1</span> Pilih tagihan.</li>
-                        <li class="flex gap-3"><span class="w-6 h-6 rounded-full bg-sky-100 text-sky-600 flex items-center justify-center text-xs font-bold shrink-0">2</span> Transfer via Bank / QRIS.</li>
-                        <li class="flex gap-3"><span class="w-6 h-6 rounded-full bg-sky-100 text-sky-600 flex items-center justify-center text-xs font-bold shrink-0">3</span> Klik "Bayar" dan isi detail.</li>
-                    </ul>
-                 </div>
-              </div>
-            </div>
-          </section>
-
-          <section id="admin-container" class="hidden mt-6 bg-white rounded-2xl p-6 shadow-sm border border-gray-100 animate-fade-in pb-10">
-            <h3 class="text-xl font-bold text-gray-800 mb-6">Admin Control Panel</h3>
-            <div class="flex flex-wrap gap-2 mb-6 p-1 bg-gray-100 rounded-lg w-fit">
-              <button class="admin-tab px-4 py-2 rounded-md text-sm font-medium transition bg-white text-sky-700 shadow-sm active">Kelola Pesanan</button>
-              <button class="admin-tab px-4 py-2 rounded-md text-sm font-medium text-gray-600 hover:bg-gray-200 transition">Validasi Bayar & Statistik</button>
+          <section id="admin-container" class="hidden animate-fade-in space-y-8">
+            <div class="flex flex-col md:flex-row md:items-center justify-between gap-4">
+                <div class="flex gap-2 p-1.5 bg-gray-200/50 rounded-2xl w-fit">
+                    <button class="admin-tab px-6 py-3 rounded-xl text-sm font-bold transition-all bg-white text-sky-600 shadow-md">📦 Pesanan</button>
+                    <button class="admin-tab px-6 py-3 rounded-xl text-sm font-bold text-gray-500 hover:text-gray-700 transition-all">📊 Keuangan</button>
+                </div>
+                <button id="resetSeed" class="text-rose-500 text-xs font-bold hover:underline opacity-50 hover:opacity-100 transition-opacity uppercase tracking-widest">Wipe Demo Data</button>
             </div>
 
-            <div id="admin-manage-view" class="admin-sub-view">
-               <div class="bg-sky-50/50 p-4 rounded-xl border border-sky-100 mb-6">
-                  <div class="text-sm font-bold text-sky-800 mb-3">Update Status Cepat</div>
-                  <div class="flex flex-col md:flex-row gap-3 items-end">
-                      <div class="flex-1 w-full">
-                          <label class="text-xs text-sky-600 block mb-1">ID Transaksi</label>
-                          <input id="adminTransId" class="w-full border border-sky-200 rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-sky-200 outline-none" placeholder="Klik baris tabel..." />
+            <div id="admin-manage-view" class="admin-sub-view space-y-6">
+               <div class="bg-sky-900 text-white rounded-[2rem] p-8 shadow-2xl relative overflow-hidden group">
+                  <div class="absolute -right-20 -top-20 w-64 h-64 bg-white/10 rounded-full blur-3xl group-hover:scale-150 transition-transform duration-1000"></div>
+                  <h4 class="text-lg font-bold mb-6 flex items-center gap-2">⚡ Quick Action Status</h4>
+                  <div class="grid grid-cols-1 md:grid-cols-4 gap-4 items-end relative z-10">
+                      <div class="md:col-span-1 space-y-2">
+                          <label class="text-[10px] uppercase font-black text-sky-300">Transaction ID</label>
+                          <input id="adminTransId" class="w-full bg-white/10 border border-white/20 rounded-xl px-4 py-3 text-sm focus:bg-white focus:text-gray-900 transition-all outline-none" placeholder="Klik baris tabel..." />
                       </div>
-                      <div class="flex-1 w-full">
-                          <label class="text-xs text-sky-600 block mb-1">Status Laundry</label>
-                          <select id="adminNewStatus" class="w-full border border-sky-200 rounded-lg px-3 py-2 text-sm bg-white focus:ring-2 focus:ring-sky-200 outline-none">
-                              <option value="NoChange">-- Tetap --</option>
+                      <div class="space-y-2">
+                          <label class="text-[10px] uppercase font-black text-sky-300">Laundry Progres</label>
+                          <select id="adminNewStatus" class="w-full bg-white/10 border border-white/20 rounded-xl px-4 py-3 text-sm focus:bg-white focus:text-gray-900 transition-all outline-none">
+                              <option value="NoChange">Tetap</option>
                               <option>Ditambahkan</option><option>Dicuci</option><option>Selesai</option><option>Diambil</option>
                           </select>
                       </div>
-                      <div class="flex-1 w-full">
-                          <label class="text-xs text-sky-600 block mb-1">Status Pembayaran</label>
-                          <select id="adminNewPayStatus" class="w-full border border-sky-200 rounded-lg px-3 py-2 text-sm bg-white focus:ring-2 focus:ring-sky-200 outline-none">
-                              <option value="NoChange">-- Tetap --</option>
+                      <div class="space-y-2">
+                          <label class="text-[10px] uppercase font-black text-sky-300">Payment Link</label>
+                          <select id="adminNewPayStatus" class="w-full bg-white/10 border border-white/20 rounded-xl px-4 py-3 text-sm focus:bg-white focus:text-gray-900 transition-all outline-none">
+                              <option value="NoChange">Tetap</option>
                               <option value="Belum Lunas">Belum Lunas</option>
                               <option value="Lunas">Lunas</option>
                           </select>
                       </div>
-                      <button id="updateStatusBtn" class="bg-sky-600 hover:bg-sky-700 text-white px-6 py-2 rounded-lg text-sm font-medium transition shadow-sm h-[38px]">Update</button>
+                      <button id="updateStatusBtn" class="bg-white text-sky-900 px-6 py-3.5 rounded-xl font-black text-sm hover:bg-sky-50 active:scale-95 transition-all shadow-xl">Apply Updates</button>
                   </div>
                </div>
-               <div id="allTransactions" class="border rounded-xl overflow-hidden shadow-sm"></div>
+               <div id="allTransactions" class="bg-white rounded-[2rem] overflow-hidden shadow-xl border border-gray-100">
+                   </div>
             </div>
 
-            <div id="admin-payment-view" class="admin-sub-view hidden">
-               <div class="grid grid-cols-1 lg:grid-cols-2 gap-8">
-                  <div>
-                      <h5 class="font-bold mb-4">Request Online Menunggu</h5>
-                      <div id="adminPendingList" class="bg-white rounded-xl border border-gray-200 overflow-hidden mb-6"></div>
-                      
-                      <h5 class="font-bold mb-4">Validasi Manual</h5>
-                      <div class="space-y-3 p-4 border rounded-xl bg-gray-50">
-                          <select id="adminPayTransId" class="w-full border p-2 rounded mb-2 bg-white"><option value="">-- Pilih Transaksi --</option></select>
-                          <div class="flex gap-2">
-                             <button id="confirmPaymentAdmin" class="flex-1 bg-green-600 text-white p-2 rounded text-sm hover:bg-green-700">Konfirmasi Lunas</button>
-                             <button id="rejectPaymentAdmin" class="flex-1 bg-red-600 text-white p-2 rounded text-sm hover:bg-red-700">Tolak</button>
+            <div id="admin-payment-view" class="admin-sub-view hidden grid grid-cols-1 lg:grid-cols-3 gap-8">
+               <div class="lg:col-span-2 space-y-6">
+                  <div class="bg-white rounded-[2rem] p-8 border border-gray-100 shadow-xl">
+                      <h5 class="text-xl font-bold mb-6 text-gray-800">Verifikasi Pembayaran</h5>
+                      <div id="adminPendingList" class="space-y-4">
                           </div>
+                  </div>
+               </div>
+               <div class="space-y-6">
+                  <div class="grid grid-cols-2 gap-4">
+                      <div class="bg-white rounded-3xl p-6 border border-amber-100 shadow-lg shadow-amber-50">
+                          <div class="text-[10px] font-black text-amber-500 uppercase mb-2">Pending</div>
+                          <div class="text-3xl font-black text-gray-800" id="pendingCount">0</div>
+                      </div>
+                      <div class="bg-white rounded-3xl p-6 border border-emerald-100 shadow-lg shadow-emerald-50">
+                          <div class="text-[10px] font-black text-emerald-500 uppercase mb-2">Success</div>
+                          <div class="text-3xl font-black text-gray-800" id="confirmedCount">0</div>
                       </div>
                   </div>
-                  <div>
-                      <h5 class="font-bold mb-4">Statistik Keuangan</h5>
-                      <div class="grid grid-cols-2 gap-4 mb-6">
-                          <div class="bg-amber-50 p-4 rounded-xl border border-amber-100">
-                              <div class="text-sm text-gray-500">Menunggu Validasi</div>
-                              <div class="text-2xl font-bold text-amber-600" id="pendingCount">0</div>
-                          </div>
-                          <div class="bg-green-50 p-4 rounded-xl border border-green-100">
-                              <div class="text-sm text-gray-500">Transaksi Lunas Hari Ini</div>
-                              <div class="text-2xl font-bold text-green-600" id="confirmedCount">0</div>
-                          </div>
-                      </div>
-                      <div class="bg-white border rounded-xl p-4 h-64 mb-4">
-                          <canvas id="adminRevenueChart"></canvas>
-                      </div>
-                      <button id="resetSeed" class="text-red-500 text-sm underline">Reset Data Demo</button>
+                  <div class="bg-white rounded-[2rem] p-6 shadow-xl border border-gray-100 h-80">
+                      <canvas id="adminRevenueChart"></canvas>
                   </div>
                </div>
             </div>
           </section>
+
+          <section id="status-view" class="hidden animate-fade-in"><div id="historyTableWrap"></div></section>
+          <section id="payment-view" class="hidden animate-fade-in"><div id="customerUnpaidList"></div></section>
 
         </div>
       </main>
     </div>
   </div>
 
-  <div id="payModal" class="fixed inset-0 z-[60] hidden flex items-center justify-center bg-black/50 backdrop-blur-sm p-4 transition-opacity duration-300">
-     <div class="bg-white rounded-2xl shadow-2xl w-full max-w-md overflow-hidden transform scale-95 transition-transform duration-300">
-        <div class="bg-gray-50 px-6 py-4 border-b flex justify-between items-center">
-            <h3 class="font-bold text-gray-800">Konfirmasi Pembayaran</h3>
-            <button id="closePayModal" class="text-gray-400 hover:text-gray-600 text-2xl">&times;</button>
+  <div id="payModal" class="fixed inset-0 z-[60] hidden flex items-center justify-center bg-sky-900/40 backdrop-blur-md p-4 transition-all duration-500 opacity-0">
+     <div class="bg-white/90 backdrop-blur-xl rounded-[2.5rem] shadow-2xl w-full max-w-md overflow-hidden transform scale-90 transition-all duration-500 border border-white/50">
+        <div class="px-8 py-6 flex justify-between items-center border-b border-gray-100">
+            <h3 class="text-xl font-bold text-gray-800">Verifikasi Transfer</h3>
+            <button id="closePayModal" class="w-10 h-10 flex items-center justify-center rounded-full hover:bg-rose-50 text-rose-500 transition-colors">&times;</button>
         </div>
-        <div class="p-6">
-            <div class="mb-4">
-                <div class="text-sm text-gray-500">Total Tagihan</div>
-                <div class="text-2xl font-bold text-sky-600" id="modalPayTotal">Rp 0</div>
-                <div class="text-xs text-gray-400 mt-1" id="modalPayId">TRANS-XXXX</div>
+        <div class="p-8">
+            <div class="bg-sky-600 rounded-3xl p-6 text-white mb-8 shadow-xl shadow-sky-200 relative overflow-hidden">
+                <div class="text-xs opacity-80 uppercase font-bold mb-1">Total Tagihan</div>
+                <div class="text-3xl font-black mb-1" id="modalPayTotal">Rp 0</div>
+                <div class="text-[10px] font-mono opacity-60" id="modalPayId">TRANS-XXXX</div>
+                <div class="absolute -right-4 -bottom-4 text-6xl opacity-10 rotate-12">💸</div>
             </div>
-            <div class="space-y-4">
-                <div>
-                    <label class="block text-sm font-medium text-gray-700 mb-1">Metode Pembayaran</label>
-                    <select id="payMethodInput" class="w-full border border-gray-200 rounded-lg px-3 py-2 text-sm bg-white">
-                        <option value="Transfer Bank (BCA)">Transfer Bank (BCA)</option>
-                        <option value="QRIS">QRIS</option>
+            <div class="space-y-5">
+                <div class="space-y-2">
+                    <label class="text-xs font-bold text-gray-500 ml-1">Metode Transfer</label>
+                    <select id="payMethodInput" class="w-full bg-gray-50 border-0 rounded-2xl px-5 py-4 text-sm font-semibold focus:ring-2 focus:ring-sky-500 transition-all">
+                        <option value="Transfer Bank (BCA)">Bank BCA</option>
+                        <option value="QRIS">QRIS All Payment</option>
                     </select>
                 </div>
-                <div>
-                    <label class="block text-sm font-medium text-gray-700 mb-1">Nama Pengirim</label>
-                    <input id="paySenderInput" class="w-full border border-gray-200 rounded-lg px-3 py-2 text-sm" placeholder="Nama pemilik rekening..." />
+                <div class="space-y-2">
+                    <label class="text-xs font-bold text-gray-500 ml-1">Nama Pengirim</label>
+                    <input id="paySenderInput" class="w-full bg-gray-50 border-0 rounded-2xl px-5 py-4 text-sm font-semibold focus:ring-2 focus:ring-sky-500 transition-all" placeholder="Nama sesuai rekening..." />
                 </div>
             </div>
-            <button id="submitPaymentProof" class="w-full bg-sky-600 hover:bg-sky-700 text-white font-semibold py-3 rounded-xl mt-6 transition shadow-lg shadow-sky-200">Kirim Bukti Pembayaran</button>
+            <button id="submitPaymentProof" class="w-full bg-gray-900 hover:bg-black text-white font-bold py-5 rounded-2xl mt-8 transition-all active:scale-95 shadow-2xl shadow-gray-300">Kirim Bukti Pembayaran</button>
         </div>
      </div>
-  </div>
-
-  <div id="toast" class="toast fixed right-6 bottom-6 z-[100] hidden bg-gray-900 text-white px-6 py-3 rounded-lg shadow-xl flex items-center gap-3">
-    <div class="w-2 h-2 rounded-full bg-green-400"></div><span id="toastText" class="text-sm font-medium"></span>
   </div>
 
   <script src="app.js" defer></script>
