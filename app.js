@@ -271,13 +271,17 @@ window.openPayModal = function(id, total){
     if(el('#modalPayTotal')) el('#modalPayTotal').textContent = fmtIDR(total); 
     if(el('#payModal')) {
         el('#payModal').classList.remove('hidden'); 
-        setTimeout(()=>el('#payModal > div').classList.remove('scale-90'), 10);
+        setTimeout(()=> {
+            el('#payModal').classList.remove('opacity-0'); // Menghilangkan transparan
+            if(el('#payModal > div')) el('#payModal > div').classList.remove('scale-90');
+        }, 10);
         el('#payModal').dataset.trxId = id;
     }
 }
 
 if(el('#closePayModal')) {
     el('#closePayModal').onclick = () => { 
+        if(el('#payModal')) el('#payModal').classList.add('opacity-0'); // Mengembalikan transparan
         if(el('#payModal > div')) el('#payModal > div').classList.add('scale-90'); 
         if(el('#payModal')) setTimeout(()=>el('#payModal').classList.add('hidden'), 300); 
     };
