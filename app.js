@@ -15,6 +15,11 @@ function fmtDate(dateStr){
 const PRICES = {"Kiloan":8000,"Satuan":15000,"Karpet":20000};
 let currentUser = null;
 
+// Variabel Cache & Sorting Admin
+let adminSortCol = 'created_at'; 
+let adminSortAsc = false;
+let adminDataCache = [];
+
 /* ==========================================
    2. LOGIKA AUTENTIKASI (LOGIN & DAFTAR)
    ========================================== */
@@ -27,21 +32,38 @@ if(el('#regBtn')) {
     el('#regBtn').onclick = async () => {
         const user = { username: el('#regUser').value, password: el('#regPass').value, name: el('#regName').value, phone: el('#regPhone').value, role: 'Pelanggan' };
         if(!user.username || !user.password || !user.name) { Swal.fire('Oops', 'Lengkapi semua data', 'warning'); return; }
+        
+        const btn = el('#regBtn');
+        btn.textContent = "Memproses..."; btn.disabled = true;
+        
         try {
             const res = await fetch('/.netlify/functions/auth', { method: 'POST', body: JSON.stringify({ action: 'register', ...user }) });
-            if(res.ok) { Swal.fire('Berhasil!', 'Akun aktif. Silakan login.', 'success'); toggleAuth(false); } 
-            else { throw new Error('Username mungkin sudah dipakai'); }
+            if(res.ok) { 
+                Swal.fire('Berhasil!', 'Akun aktif. Silakan login.', 'success'); 
+                toggleAuth(false); 
+            } else { 
+                const data = await res.json();
+                throw new Error(data.error || 'Username mungkin sudah dipakai'); 
+            }
         } catch (e) { Swal.fire('Gagal!', e.message, 'error'); }
+        
+        btn.textContent = "Buat Akun"; btn.disabled = false;
     };
 }
 
 if(el('#loginBtn')) {
     el('#loginBtn').onclick = async () => {
         const u = el('#loginUser').value, p = el('#loginPass').value, r = el('#loginRole').value;
+        if(!u || !p) { Swal.fire('Oops', 'Masukkan username dan password', 'warning'); return; }
+        
         if(u === 'admin' && p === '123' && r === 'Admin'){
             localStorage.setItem('SIML_user', JSON.stringify({username:'admin', name:'Super Admin', role:'Admin'}));
             loadSession(); return;
         }
+
+        const btn = el('#loginBtn');
+        btn.textContent = "Mengecek..."; btn.disabled = true;
+
         try {
             const res = await fetch('/.netlify/functions/auth', { method: 'POST', body: JSON.stringify({ action: 'login', username: u, password: p, role: r }) });
             if(res.ok) {
@@ -49,8 +71,13 @@ if(el('#loginBtn')) {
                 localStorage.setItem('SIML_user', JSON.stringify(user));
                 Swal.fire({ title: 'Berhasil Login', icon: 'success', toast: true, position: 'top-end', showConfirmButton: false, timer: 1500 });
                 loadSession();
-            } else { Swal.fire('Error', 'Username atau Password salah!', 'error'); }
+            } else { 
+                const data = await res.json();
+                Swal.fire('Error', data.error || 'Username atau Password salah!', 'error'); 
+            }
         } catch (e) { Swal.fire('Error Jaringan', 'Cek koneksi database Anda', 'error'); }
+        
+        btn.textContent = "Masuk Sekarang"; btn.disabled = false;
     };
 }
 
@@ -101,6 +128,11 @@ function updateProfileUI() {
 if(el('#photoUpload')){
     el('#photoUpload').onchange = (e) => {
         const file = e.target.files[0]; if(!file) return;
+        
+        if(file.size > 2 * 1024 * 1024) {
+            Swal.fire('Oops', 'Ukuran foto maksimal 2MB', 'warning'); return;
+        }
+
         const reader = new FileReader();
         reader.onloadend = () => {
             currentUser.photo_url = reader.result;
@@ -109,6 +141,37 @@ if(el('#photoUpload')){
             Swal.fire({ title: 'Foto Diperbarui', icon: 'success', toast: true, position: 'top-end', showConfirmButton: false, timer: 1500 });
         };
         reader.readAsDataURL(file);
+    };
+}
+
+if(el('#btnChangeUsername')){
+    el('#btnChangeUsername').onclick = async () => {
+        const newU = el('#newUsernameInput').value.trim();
+        const pass = el('#confirmPasswordInput').value;
+
+        if(!newU || !pass) { Swal.fire('Oops', 'Isi username baru dan password saat ini', 'warning'); return; }
+        if(newU === currentUser.username) { Swal.fire('Oops', 'Username baru tidak boleh sama dengan yang lama', 'warning'); return; }
+
+        const btn = el('#btnChangeUsername');
+        btn.textContent = "Menyimpan..."; btn.disabled = true;
+
+        try {
+            const res = await fetch('/.netlify/functions/auth', {
+                method: 'POST',
+                body: JSON.stringify({ action: 'change_username', oldUsername: currentUser.username, newUsername: newU, password: pass })
+            });
+            const result = await res.json();
+
+            if(res.ok) {
+                currentUser.username = result.username;
+                localStorage.setItem('SIML_user', JSON.stringify(currentUser));
+                updateProfileUI();
+                el('#newUsernameInput').value = ''; el('#confirmPasswordInput').value = '';
+                Swal.fire('Berhasil', 'Username Anda telah diubah', 'success');
+            } else { throw new Error(result.error || 'Gagal mengubah username'); }
+        } catch (e) { Swal.fire('Gagal', e.message, 'error'); }
+
+        btn.textContent = "Simpan Username"; btn.disabled = false;
     };
 }
 
@@ -125,7 +188,7 @@ window.switchView = function(id, title = "Dashboard"){
     if(id==='input-view') renderMyActive();
     if(id==='status-view') renderHistory();
     if(id==='payment-view') renderCustomerPayment();
-    if(id==='admin-container') renderAdminAll();
+    if(id==='admin-container') renderAdminAll(true);
 }
 
 $$('[data-view]').forEach(b => b.addEventListener('click', (e)=> {
@@ -134,7 +197,7 @@ $$('[data-view]').forEach(b => b.addEventListener('click', (e)=> {
 if(el('#menuToggle')) el('#menuToggle').addEventListener('click', ()=>el('#sidebar').classList.toggle('hidden'));
 
 /* ==========================================
-   5. LOGIKA DATA LAUNDRY & LOG
+   5. LOGIKA DATA LAUNDRY & PESANAN (PELANGGAN)
    ========================================== */
 async function fetchTrans() {
     try { const res = await fetch('/.netlify/functions/api'); return res.ok ? await res.json() : []; } 
@@ -185,7 +248,7 @@ async function renderHistory(){
 }
 
 /* ==========================================
-   6. LOGIKA PEMBAYARAN
+   6. LOGIKA PEMBAYARAN (PELANGGAN)
    ========================================== */
 async function renderCustomerPayment(){
     if(!currentUser) return;
@@ -243,7 +306,7 @@ if(el('#submitPaymentProof')) {
 }
 
 /* ==========================================
-   7. LOGIKA ADMIN (PESANAN, LOG, DELETE)
+   7. LOGIKA ADMIN (SORTING, PESANAN, LOG, DELETE)
    ========================================== */
 const adminTabs = $$('.admin-tab');
 if(adminTabs.length > 0) {
@@ -251,16 +314,47 @@ if(adminTabs.length > 0) {
         adminTabs.forEach(b => { b.classList.remove('bg-white','text-sky-600','shadow-md'); b.classList.add('text-gray-500'); });
         btn.classList.add('bg-white','text-sky-600','shadow-md'); btn.classList.remove('text-gray-500');
         $$('.admin-sub-view').forEach(v=>v.classList.add('hidden'));
-        if(i===0){ if(el('#admin-manage-view')) el('#admin-manage-view').classList.remove('hidden'); renderAdminAll(); }
+        if(i===0){ if(el('#admin-manage-view')) el('#admin-manage-view').classList.remove('hidden'); renderAdminAll(true); }
         if(i===1){ if(el('#admin-payment-view')) el('#admin-payment-view').classList.remove('hidden'); renderAdminPayment(); }
     });
 }
 
-async function renderAdminAll(){
-    const all = await fetchTrans();
+// Fungsi Sort
+window.sortAdminTable = function(col) {
+    if (adminSortCol === col) { adminSortAsc = !adminSortAsc; } 
+    else { adminSortCol = col; adminSortAsc = true; }
+    renderAdminAll(false); 
+};
+
+async function renderAdminAll(forceFetch = true){
+    if(forceFetch || adminDataCache.length === 0) {
+        if(el('#allTransactions')) el('#allTransactions').innerHTML = '<div class="h-32 w-full bg-gray-200 animate-pulse rounded-[2rem]"></div>';
+        adminDataCache = await fetchTrans();
+    }
+
+    let sortedData = [...adminDataCache];
+    sortedData.sort((a, b) => {
+        let valA = a[adminSortCol] || ''; let valB = b[adminSortCol] || '';
+        if(typeof valA === 'string') valA = valA.toLowerCase();
+        if(typeof valB === 'string') valB = valB.toLowerCase();
+        
+        if(valA < valB) return adminSortAsc ? -1 : 1;
+        if(valA > valB) return adminSortAsc ? 1 : -1;
+        return 0;
+    });
+
+    const getSortIcon = (col) => adminSortCol === col ? (adminSortAsc ? ' <span class="text-sky-500 font-black">↑</span>' : ' <span class="text-sky-500 font-black">↓</span>') : ' <span class="text-gray-300">↕</span>';
+
     if(el('#allTransactions')) {
-        el('#allTransactions').innerHTML = `<table class="w-full text-sm text-left"><thead class="bg-gray-50 border-b border-gray-100"><tr><th class="p-4">ID</th><th class="p-4">Pelanggan</th><th class="p-4">Status</th><th class="p-4">Pembayaran</th><th class="p-4 text-center">Aksi</th></tr></thead><tbody>
-        ${all.map(x=>`<tr class="border-b hover:bg-sky-50 transition-colors"><td class="p-4 font-mono text-xs cursor-pointer" onclick="fillAdminInputs('${x.id}')">${x.id}</td><td class="p-4 font-bold cursor-pointer" onclick="fillAdminInputs('${x.id}')">${x.customer_name}</td><td class="p-4"><span class="px-3 py-1 rounded-xl bg-gray-100 text-xs font-bold">${x.status_laundry}</span></td><td class="p-4"><span class="${x.status_payment==='Lunas'?'text-emerald-600 bg-emerald-50':'text-rose-600 bg-rose-50'} px-3 py-1 rounded-xl font-bold text-xs">${x.status_payment}</span><br><span class="text-[10px] text-gray-400 block mt-1">${x.payment_verified_at ? 'Lunas: '+fmtDate(x.payment_verified_at) : ''}</span></td><td class="p-4 flex gap-2 justify-center"><button onclick="viewLogs('${x.id}')" class="bg-indigo-100 text-indigo-600 hover:bg-indigo-200 px-3 py-1.5 rounded-lg text-xs font-bold transition-all">Log</button><button onclick="deleteOrder('${x.id}')" class="bg-rose-100 text-rose-600 hover:bg-rose-200 px-3 py-1.5 rounded-lg text-xs font-bold transition-all">Hapus</button></td></tr>`).join('')}</tbody></table>`;
+        el('#allTransactions').innerHTML = `<table class="w-full text-sm text-left"><thead class="bg-gray-50 border-b border-gray-100">
+        <tr>
+            <th class="p-4 cursor-pointer hover:bg-gray-200 transition-colors select-none" onclick="sortAdminTable('id')">ID ${getSortIcon('id')}</th>
+            <th class="p-4 cursor-pointer hover:bg-gray-200 transition-colors select-none" onclick="sortAdminTable('customer_name')">Pelanggan ${getSortIcon('customer_name')}</th>
+            <th class="p-4 cursor-pointer hover:bg-gray-200 transition-colors select-none" onclick="sortAdminTable('status_laundry')">Status ${getSortIcon('status_laundry')}</th>
+            <th class="p-4 cursor-pointer hover:bg-gray-200 transition-colors select-none" onclick="sortAdminTable('status_payment')">Pembayaran ${getSortIcon('status_payment')}</th>
+            <th class="p-4 text-center">Aksi</th>
+        </tr></thead><tbody>
+        ${sortedData.map(x=>`<tr class="border-b hover:bg-sky-50 transition-colors"><td class="p-4 font-mono text-xs cursor-pointer" onclick="fillAdminInputs('${x.id}')">${x.id}</td><td class="p-4 font-bold cursor-pointer" onclick="fillAdminInputs('${x.id}')">${x.customer_name}</td><td class="p-4"><span class="px-3 py-1 rounded-xl bg-gray-100 text-xs font-bold">${x.status_laundry}</span></td><td class="p-4"><span class="${x.status_payment==='Lunas'?'text-emerald-600 bg-emerald-50':'text-rose-600 bg-rose-50'} px-3 py-1 rounded-xl font-bold text-xs">${x.status_payment}</span><br><span class="text-[10px] text-gray-400 block mt-1">${x.payment_verified_at ? 'Lunas: '+fmtDate(x.payment_verified_at) : ''}</span></td><td class="p-4 flex gap-2 justify-center"><button onclick="viewLogs('${x.id}')" class="bg-indigo-100 text-indigo-600 hover:bg-indigo-200 px-3 py-1.5 rounded-lg text-xs font-bold transition-all">Log</button><button onclick="deleteOrder('${x.id}')" class="bg-rose-100 text-rose-600 hover:bg-rose-200 px-3 py-1.5 rounded-lg text-xs font-bold transition-all">Hapus</button></td></tr>`).join('')}</tbody></table>`;
     }
 }
 
@@ -277,24 +371,24 @@ if(el('#updateStatusBtn')) {
         try {
             await fetch('/.netlify/functions/api', { method: 'PUT', body: JSON.stringify({ action: 'admin_update', id: id, status_laundry: sl !== 'NoChange' ? sl : null, status_payment: sp !== 'NoChange' ? sp : null }) });
             Swal.fire({ title: 'Diperbarui', icon: 'success', toast: true, position: 'top-end', showConfirmButton: false, timer: 1500 });
-            renderAdminAll();
+            renderAdminAll(true);
         } catch(e) {}
     };
 }
 
-// Fitur Hapus
+// Fitur Hapus Pesanan
 window.deleteOrder = async function(id) {
     const result = await Swal.fire({ title: `Hapus ${id}?`, text: "Data dan log akan hilang permanen!", icon: 'warning', showCancelButton: true, confirmButtonColor: '#d33', cancelButtonColor: '#3085d6', confirmButtonText: 'Ya, hapus!' });
     if(result.isConfirmed) {
         try {
             await fetch('/.netlify/functions/api', { method: 'DELETE', body: JSON.stringify({ id: id }) });
             Swal.fire('Terhapus!', 'Pesanan berhasil dihapus.', 'success');
-            renderAdminAll();
+            renderAdminAll(true);
         } catch(e) { Swal.fire('Error', 'Gagal menghapus', 'error'); }
     }
 }
 
-// Fitur View Log
+// Fitur Lihat Log/Riwayat
 window.viewLogs = async function(id) {
     if(el('#logModalId')) el('#logModalId').textContent = id;
     if(el('#logModalContent')) el('#logModalContent').innerHTML = '<div class="text-center text-sm text-gray-500 py-4">Memuat data...</div>';
