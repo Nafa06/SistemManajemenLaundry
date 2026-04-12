@@ -1,5 +1,5 @@
 /* ==========================================
-   1. FUNGSI PEMBANTU (HELPERS)
+   1. FUNGSI PEMBANTU (HELPERS & LOADING)
    ========================================== */
 const el = s => document.querySelector(s);
 const $$ = s => Array.from(document.querySelectorAll(s));
@@ -12,10 +12,33 @@ function fmtDate(dateStr){
     return d.toLocaleDateString('id-ID', {day:'numeric', month:'short', year:'numeric', hour:'2-digit', minute:'2-digit'});
 }
 
+// 🔥 FUNGSI BARU: Animasi Loading Dinamis untuk Tombol
+function setLoading(btn, isLoading) {
+    if (!btn) return;
+    if (isLoading) {
+        btn.disabled = true;
+        btn.dataset.originalText = btn.innerHTML; // Simpan teks asli
+        // Ganti isi tombol dengan Spinner SVG + Teks
+        btn.innerHTML = `
+            <div class="flex items-center justify-center gap-2">
+                <svg class="animate-spin h-5 w-5 text-current opacity-80" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                    <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+                    <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                </svg>
+                <span>Memproses...</span>
+            </div>
+        `;
+        btn.classList.add('opacity-70', 'cursor-wait');
+    } else {
+        btn.disabled = false;
+        btn.innerHTML = btn.dataset.originalText; // Kembalikan teks asli
+        btn.classList.remove('opacity-70', 'cursor-wait');
+    }
+}
+
 const PRICES = {"Kiloan":8000,"Satuan":15000,"Karpet":20000};
 let currentUser = null;
 
-// Variabel Cache & Sorting Admin
 let adminSortCol = 'created_at'; 
 let adminSortAsc = false;
 let adminDataCache = [];
@@ -33,9 +56,7 @@ if(el('#regBtn')) {
         const user = { username: el('#regUser').value, password: el('#regPass').value, name: el('#regName').value, phone: el('#regPhone').value, role: 'Pelanggan' };
         if(!user.username || !user.password || !user.name) { Swal.fire('Oops', 'Lengkapi semua data', 'warning'); return; }
         
-        const btn = el('#regBtn');
-        btn.textContent = "Memproses..."; btn.disabled = true;
-        
+        setLoading(el('#regBtn'), true); // ⏳ Loading On
         try {
             const res = await fetch('/.netlify/functions/auth', { method: 'POST', body: JSON.stringify({ action: 'register', ...user }) });
             if(res.ok) { 
@@ -46,8 +67,7 @@ if(el('#regBtn')) {
                 throw new Error(data.error || 'Username mungkin sudah dipakai'); 
             }
         } catch (e) { Swal.fire('Gagal!', e.message, 'error'); }
-        
-        btn.textContent = "Buat Akun"; btn.disabled = false;
+        setLoading(el('#regBtn'), false); // ⏳ Loading Off
     };
 }
 
@@ -61,9 +81,7 @@ if(el('#loginBtn')) {
             loadSession(); return;
         }
 
-        const btn = el('#loginBtn');
-        btn.textContent = "Mengecek..."; btn.disabled = true;
-
+        setLoading(el('#loginBtn'), true); // ⏳ Loading On
         try {
             const res = await fetch('/.netlify/functions/auth', { method: 'POST', body: JSON.stringify({ action: 'login', username: u, password: p, role: r }) });
             if(res.ok) {
@@ -76,8 +94,7 @@ if(el('#loginBtn')) {
                 Swal.fire('Error', data.error || 'Username atau Password salah!', 'error'); 
             }
         } catch (e) { Swal.fire('Error Jaringan', 'Cek koneksi database Anda', 'error'); }
-        
-        btn.textContent = "Masuk Sekarang"; btn.disabled = false;
+        setLoading(el('#loginBtn'), false); // ⏳ Loading Off
     };
 }
 
@@ -116,100 +133,70 @@ function updateProfileUI() {
     if(!currentUser) return;
     const photo = currentUser.photo_url || `https://ui-avatars.com/api/?name=${currentUser.name}&background=0D8ABC&color=fff`;
     
-    // Update Gambar
     if(el('#sideAvatar')) el('#sideAvatar').src = photo;
     if(el('#topAvatar')) el('#topAvatar').src = photo;
     if(el('#profilePreview')) el('#profilePreview').src = photo;
+    if(el('#profNameDisplay')) el('#profNameDisplay').textContent = currentUser.name;
     
-    // Update Teks (Menonjolkan Username sesuai permintaan)
     if(el('#profUsernameDisplay')) el('#profUsernameDisplay').textContent = `@${currentUser.username}`;
     if(el('#profNameRoleDisplay')) el('#profNameRoleDisplay').textContent = `${currentUser.name} • ${currentUser.role}`;
     
     if(el('#profUsername')) el('#profUsername').textContent = `@${currentUser.username}`;
     if(el('#profPhone')) el('#profPhone').textContent = currentUser.phone || '-';
-    if(el('#sideUserName')) el('#sideUserName').textContent = currentUser.name;
-    if(el('#userChipTop')) el('#userChipTop').textContent = currentUser.name;
-
-    // Sembunyikan tombol simpan saat UI di-refresh
+    if(el('#sideUserName')) el('#sideUserName').textContent = `@${currentUser.username}`;
+    if(el('#userChipTop')) el('#userChipTop').textContent = `@${currentUser.username}`;
+    
     if(el('#btnSavePhoto')) el('#btnSavePhoto').classList.add('hidden');
 }
 
-// Variabel penampung foto sementara
 let pendingPhotoBase64 = null; 
 
-// Saat User Memilih Foto (Preview Saja)
 if(el('#photoUpload')){
     el('#photoUpload').onchange = (e) => {
         const file = e.target.files[0]; if(!file) return;
-        
-        if(file.size > 2 * 1024 * 1024) {
-            Swal.fire('Oops', 'Ukuran foto maksimal 2MB ya!', 'warning'); return;
-        }
+        if(file.size > 2 * 1024 * 1024) { Swal.fire('Oops', 'Ukuran foto maksimal 2MB ya!', 'warning'); return; }
 
         const reader = new FileReader();
         reader.onloadend = () => {
-            pendingPhotoBase64 = reader.result; // Simpan di memori sementara
-            if(el('#profilePreview')) el('#profilePreview').src = pendingPhotoBase64; // Preview ke layar
-            if(el('#btnSavePhoto')) el('#btnSavePhoto').classList.remove('hidden'); // Munculkan tombol simpan
+            pendingPhotoBase64 = reader.result;
+            if(el('#profilePreview')) el('#profilePreview').src = pendingPhotoBase64;
+            if(el('#btnSavePhoto')) el('#btnSavePhoto').classList.remove('hidden');
         };
         reader.readAsDataURL(file);
     };
 }
 
-// Saat User Mengklik Tombol "Simpan Foto" (Kirim ke Database)
 if(el('#btnSavePhoto')) {
     el('#btnSavePhoto').onclick = async () => {
         if(!pendingPhotoBase64) return;
-        
-        const btn = el('#btnSavePhoto');
-        btn.textContent = "Menyimpan..."; btn.disabled = true;
-
+        setLoading(el('#btnSavePhoto'), true); // ⏳ Loading On
         try {
             const res = await fetch('/.netlify/functions/auth', {
-                method: 'POST',
-                body: JSON.stringify({ 
-                    action: 'update_photo', 
-                    username: currentUser.username, 
-                    photo_url: pendingPhotoBase64 
-                })
+                method: 'POST', body: JSON.stringify({ action: 'update_photo', username: currentUser.username, photo_url: pendingPhotoBase64 })
             });
-
             if(res.ok) {
-                // Update memori lokal
                 currentUser.photo_url = pendingPhotoBase64;
                 localStorage.setItem('SIML_user', JSON.stringify(currentUser));
-                
-                // Segarkan tampilan
                 updateProfileUI(); 
-                Swal.fire({ title: 'Foto Tersimpan!', text: 'Foto profil Anda kini permanen.', icon: 'success', toast: true, position: 'top-end', showConfirmButton: false, timer: 2000 });
-            } else {
-                throw new Error('Gagal menyimpan foto ke server');
-            }
-        } catch (e) {
-            Swal.fire('Gagal', e.message, 'error');
-            btn.textContent = "💾 Simpan Foto"; btn.disabled = false;
-        }
+                Swal.fire({ title: 'Foto Tersimpan!', icon: 'success', toast: true, position: 'top-end', showConfirmButton: false, timer: 2000 });
+            } else { throw new Error('Gagal menyimpan foto'); }
+        } catch (e) { Swal.fire('Gagal', e.message, 'error'); }
+        setLoading(el('#btnSavePhoto'), false); // ⏳ Loading Off
     };
 }
 
 if(el('#btnChangeUsername')){
     el('#btnChangeUsername').onclick = async () => {
-        const newU = el('#newUsernameInput').value.trim();
-        const pass = el('#confirmPasswordInput').value;
-
+        const newU = el('#newUsernameInput').value.trim(), pass = el('#confirmPasswordInput').value;
         if(!newU || !pass) { Swal.fire('Oops', 'Isi username baru dan password saat ini', 'warning'); return; }
         if(newU === currentUser.username) { Swal.fire('Oops', 'Username baru tidak boleh sama dengan yang lama', 'warning'); return; }
 
-        const btn = el('#btnChangeUsername');
-        btn.textContent = "Menyimpan..."; btn.disabled = true;
-
+        setLoading(el('#btnChangeUsername'), true); // ⏳ Loading On
         try {
             const res = await fetch('/.netlify/functions/auth', {
-                method: 'POST',
-                body: JSON.stringify({ action: 'change_username', oldUsername: currentUser.username, newUsername: newU, password: pass })
+                method: 'POST', body: JSON.stringify({ action: 'change_username', oldUsername: currentUser.username, newUsername: newU, password: pass })
             });
             const result = await res.json();
-
             if(res.ok) {
                 currentUser.username = result.username;
                 localStorage.setItem('SIML_user', JSON.stringify(currentUser));
@@ -218,8 +205,7 @@ if(el('#btnChangeUsername')){
                 Swal.fire('Berhasil', 'Username Anda telah diubah', 'success');
             } else { throw new Error(result.error || 'Gagal mengubah username'); }
         } catch (e) { Swal.fire('Gagal', e.message, 'error'); }
-
-        btn.textContent = "Simpan Username"; btn.disabled = false;
+        setLoading(el('#btnChangeUsername'), false); // ⏳ Loading Off
     };
 }
 
@@ -245,7 +231,7 @@ $$('[data-view]').forEach(b => b.addEventListener('click', (e)=> {
 if(el('#menuToggle')) el('#menuToggle').addEventListener('click', ()=>el('#sidebar').classList.toggle('hidden'));
 
 /* ==========================================
-   5. LOGIKA DATA LAUNDRY & PESANAN (PELANGGAN)
+   5. LOGIKA DATA LAUNDRY & PESANAN
    ========================================== */
 async function fetchTrans() {
     try { const res = await fetch('/.netlify/functions/api'); return res.ok ? await res.json() : []; } 
@@ -261,8 +247,8 @@ if(el('#submitLaundry')) {
     el('#submitLaundry').addEventListener('click', async ()=>{
         const nm=el('#lndName').value, ct=el('#lndContact').value, sv=el('#lndService').value, qt=el('#lndQty').value, ds=el('#lndDesc').value;
         if(!nm || !qt){ Swal.fire('Oops', 'Data tidak lengkap', 'warning'); return; }
-        const btn = el('#submitLaundry'); btn.innerHTML = 'Memproses...'; btn.disabled = true;
-
+        
+        setLoading(el('#submitLaundry'), true); // ⏳ Loading On
         try {
             const payload = { id: 'TRX-' + Math.floor(Math.random()*10000), customer_name: nm, contact: ct, service_type: sv, qty: parseFloat(qt), description: ds, total_price: PRICES[sv]*parseFloat(qt), created_by: currentUser.username };
             const res = await fetch('/.netlify/functions/api', { method: 'POST', body: JSON.stringify(payload) });
@@ -272,7 +258,7 @@ if(el('#submitLaundry')) {
                 renderMyActive(); updateBadges();
             } else throw new Error('Gagal menyimpan');
         } catch (e) { Swal.fire('Error', e.message, 'error'); }
-        btn.innerHTML = 'Kirim Pesanan'; btn.disabled = false;
+        setLoading(el('#submitLaundry'), false); // ⏳ Loading Off
     });
 }
 
@@ -342,14 +328,14 @@ if(el('#submitPaymentProof')) {
         const method = el('#payMethodInput').value, sender = el('#paySenderInput').value;
         if(!sender){ Swal.fire('Oops','Isi nama pengirim','warning'); return; }
         
-        el('#submitPaymentProof').textContent = "Mengirim...";
+        setLoading(el('#submitPaymentProof'), true); // ⏳ Loading On
         try {
             await fetch('/.netlify/functions/api', { method: 'PUT', body: JSON.stringify({ action: 'confirm_payment', id: id, method: method, sender: sender }) });
             Swal.fire('Terkirim!', 'Bukti transfer sedang diproses admin', 'success');
             if(el('#closePayModal')) el('#closePayModal').click(); 
             renderCustomerPayment();
         } catch(e) { Swal.fire('Error', 'Gagal mengirim', 'error'); }
-        el('#submitPaymentProof').textContent = "Kirim Bukti Pembayaran";
+        setLoading(el('#submitPaymentProof'), false); // ⏳ Loading Off
     };
 }
 
@@ -369,8 +355,7 @@ if(adminTabs.length > 0) {
 
 // Fungsi Sort
 window.sortAdminTable = function(col) {
-    if (adminSortCol === col) { adminSortAsc = !adminSortAsc; } 
-    else { adminSortCol = col; adminSortAsc = true; }
+    if (adminSortCol === col) { adminSortAsc = !adminSortAsc; } else { adminSortCol = col; adminSortAsc = true; }
     renderAdminAll(false); 
 };
 
@@ -385,7 +370,6 @@ async function renderAdminAll(forceFetch = true){
         let valA = a[adminSortCol] || ''; let valB = b[adminSortCol] || '';
         if(typeof valA === 'string') valA = valA.toLowerCase();
         if(typeof valB === 'string') valB = valB.toLowerCase();
-        
         if(valA < valB) return adminSortAsc ? -1 : 1;
         if(valA > valB) return adminSortAsc ? 1 : -1;
         return 0;
@@ -416,18 +400,22 @@ if(el('#updateStatusBtn')) {
     el('#updateStatusBtn').onclick = async () => {
         const id = el('#adminTransId').value.trim(), sl = el('#adminNewStatus').value, sp = el('#adminNewPayStatus').value; 
         if(!id) return;
+        
+        setLoading(el('#updateStatusBtn'), true); // ⏳ Loading On
         try {
             await fetch('/.netlify/functions/api', { method: 'PUT', body: JSON.stringify({ action: 'admin_update', id: id, status_laundry: sl !== 'NoChange' ? sl : null, status_payment: sp !== 'NoChange' ? sp : null }) });
             Swal.fire({ title: 'Diperbarui', icon: 'success', toast: true, position: 'top-end', showConfirmButton: false, timer: 1500 });
             renderAdminAll(true);
         } catch(e) {}
+        setLoading(el('#updateStatusBtn'), false); // ⏳ Loading Off
     };
 }
 
-// Fitur Hapus Pesanan
+// Fitur Hapus Pesanan (Loading pakai Swal)
 window.deleteOrder = async function(id) {
     const result = await Swal.fire({ title: `Hapus ${id}?`, text: "Data dan log akan hilang permanen!", icon: 'warning', showCancelButton: true, confirmButtonColor: '#d33', cancelButtonColor: '#3085d6', confirmButtonText: 'Ya, hapus!' });
     if(result.isConfirmed) {
+        Swal.fire({title: 'Menghapus...', allowOutsideClick: false, didOpen: () => { Swal.showLoading() }}); // ⏳ Loading Swal
         try {
             await fetch('/.netlify/functions/api', { method: 'DELETE', body: JSON.stringify({ id: id }) });
             Swal.fire('Terhapus!', 'Pesanan berhasil dihapus.', 'success');
@@ -439,7 +427,7 @@ window.deleteOrder = async function(id) {
 // Fitur Lihat Log/Riwayat
 window.viewLogs = async function(id) {
     if(el('#logModalId')) el('#logModalId').textContent = id;
-    if(el('#logModalContent')) el('#logModalContent').innerHTML = '<div class="text-center text-sm text-gray-500 py-4">Memuat data...</div>';
+    if(el('#logModalContent')) el('#logModalContent').innerHTML = '<div class="text-center py-8"><svg class="animate-spin h-8 w-8 text-sky-500 mx-auto" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24"><circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle><path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path></svg></div>';
     
     if(el('#logModal')) {
         el('#logModal').classList.remove('hidden');
@@ -482,6 +470,7 @@ async function renderAdminPayment(){
 }
 
 window.admDecide = async function(id, approve){
+    Swal.fire({title: 'Memproses...', allowOutsideClick: false, didOpen: () => { Swal.showLoading() }}); // ⏳ Loading Swal
     try {
         await fetch('/.netlify/functions/api', { method: 'PUT', body: JSON.stringify({ action: 'admin_update', id: id, status_payment: approve ? 'Lunas' : 'Belum Lunas' }) });
         Swal.fire('Sukses', 'Status pembayaran diubah', 'success');
@@ -496,8 +485,6 @@ async function updateBadges(){
     const badge = el('#payBadge');
     if(badge) { if(unpaid.length > 0) { badge.textContent = unpaid.length; badge.classList.remove('hidden'); } else { badge.classList.add('hidden'); } }
 }
-
-if(el('#resetSeed')) el('#resetSeed').onclick = () => { localStorage.clear(); location.reload(); };
 
 // INIT
 loadSession();
