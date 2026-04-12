@@ -115,32 +115,80 @@ async function loadSession(){
 function updateProfileUI() {
     if(!currentUser) return;
     const photo = currentUser.photo_url || `https://ui-avatars.com/api/?name=${currentUser.name}&background=0D8ABC&color=fff`;
+    
+    // Update Gambar
     if(el('#sideAvatar')) el('#sideAvatar').src = photo;
     if(el('#topAvatar')) el('#topAvatar').src = photo;
     if(el('#profilePreview')) el('#profilePreview').src = photo;
-    if(el('#profNameDisplay')) el('#profNameDisplay').textContent = currentUser.name;
+    
+    // Update Teks (Menonjolkan Username sesuai permintaan)
+    if(el('#profUsernameDisplay')) el('#profUsernameDisplay').textContent = `@${currentUser.username}`;
+    if(el('#profNameRoleDisplay')) el('#profNameRoleDisplay').textContent = `${currentUser.name} • ${currentUser.role}`;
+    
     if(el('#profUsername')) el('#profUsername').textContent = `@${currentUser.username}`;
     if(el('#profPhone')) el('#profPhone').textContent = currentUser.phone || '-';
     if(el('#sideUserName')) el('#sideUserName').textContent = currentUser.name;
     if(el('#userChipTop')) el('#userChipTop').textContent = currentUser.name;
+
+    // Sembunyikan tombol simpan saat UI di-refresh
+    if(el('#btnSavePhoto')) el('#btnSavePhoto').classList.add('hidden');
 }
 
+// Variabel penampung foto sementara
+let pendingPhotoBase64 = null; 
+
+// Saat User Memilih Foto (Preview Saja)
 if(el('#photoUpload')){
     el('#photoUpload').onchange = (e) => {
         const file = e.target.files[0]; if(!file) return;
         
         if(file.size > 2 * 1024 * 1024) {
-            Swal.fire('Oops', 'Ukuran foto maksimal 2MB', 'warning'); return;
+            Swal.fire('Oops', 'Ukuran foto maksimal 2MB ya!', 'warning'); return;
         }
 
         const reader = new FileReader();
         reader.onloadend = () => {
-            currentUser.photo_url = reader.result;
-            localStorage.setItem('SIML_user', JSON.stringify(currentUser));
-            updateProfileUI();
-            Swal.fire({ title: 'Foto Diperbarui', icon: 'success', toast: true, position: 'top-end', showConfirmButton: false, timer: 1500 });
+            pendingPhotoBase64 = reader.result; // Simpan di memori sementara
+            if(el('#profilePreview')) el('#profilePreview').src = pendingPhotoBase64; // Preview ke layar
+            if(el('#btnSavePhoto')) el('#btnSavePhoto').classList.remove('hidden'); // Munculkan tombol simpan
         };
         reader.readAsDataURL(file);
+    };
+}
+
+// Saat User Mengklik Tombol "Simpan Foto" (Kirim ke Database)
+if(el('#btnSavePhoto')) {
+    el('#btnSavePhoto').onclick = async () => {
+        if(!pendingPhotoBase64) return;
+        
+        const btn = el('#btnSavePhoto');
+        btn.textContent = "Menyimpan..."; btn.disabled = true;
+
+        try {
+            const res = await fetch('/.netlify/functions/auth', {
+                method: 'POST',
+                body: JSON.stringify({ 
+                    action: 'update_photo', 
+                    username: currentUser.username, 
+                    photo_url: pendingPhotoBase64 
+                })
+            });
+
+            if(res.ok) {
+                // Update memori lokal
+                currentUser.photo_url = pendingPhotoBase64;
+                localStorage.setItem('SIML_user', JSON.stringify(currentUser));
+                
+                // Segarkan tampilan
+                updateProfileUI(); 
+                Swal.fire({ title: 'Foto Tersimpan!', text: 'Foto profil Anda kini permanen.', icon: 'success', toast: true, position: 'top-end', showConfirmButton: false, timer: 2000 });
+            } else {
+                throw new Error('Gagal menyimpan foto ke server');
+            }
+        } catch (e) {
+            Swal.fire('Gagal', e.message, 'error');
+            btn.textContent = "💾 Simpan Foto"; btn.disabled = false;
+        }
     };
 }
 

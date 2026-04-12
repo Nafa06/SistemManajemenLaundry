@@ -113,38 +113,44 @@
           <section id="profile-view" class="hidden animate-fade-in max-w-2xl mx-auto">
               <div class="bg-white rounded-[2.5rem] p-10 shadow-xl border border-gray-100">
                   <h3 class="text-2xl font-bold mb-8">Informasi Akun</h3>
-                  <div class="flex flex-col items-center mb-8">
+                  
+                  <div class="flex flex-col items-center mb-8 border-b border-gray-100 pb-8">
                       <div class="relative group">
-                          <img id="profilePreview" src="https://ui-avatars.com/api/?name=User" class="w-32 h-32 rounded-[2rem] object-cover shadow-2xl border-4 border-white mb-4">
-                          <label for="photoUpload" class="absolute inset-0 bg-black/40 rounded-[2rem] flex items-center justify-center opacity-0 group-hover:opacity-100 cursor-pointer transition-all text-white text-xs font-bold">Ubah Foto</label>
+                          <img id="profilePreview" src="https://ui-avatars.com/api/?name=User" class="w-32 h-32 rounded-[2rem] object-cover shadow-2xl border-4 border-white mb-4 transition-all">
+                          <label for="photoUpload" class="absolute inset-0 bg-black/50 rounded-[2rem] flex items-center justify-center opacity-0 group-hover:opacity-100 cursor-pointer transition-all text-white text-xs font-bold shadow-inner">Pilih Foto</label>
                           <input type="file" id="photoUpload" class="hidden" accept="image/*">
                       </div>
-                      <h4 id="profNameDisplay" class="text-xl font-bold">Naufal</h4>
-                      <p id="profRoleDisplay" class="text-sm text-gray-400">Pelanggan</p>
+                      
+                      <button id="btnSavePhoto" class="hidden mb-4 bg-emerald-500 hover:bg-emerald-600 text-white px-5 py-2 rounded-xl text-sm font-bold transition-all shadow-lg shadow-emerald-200 active:scale-95">💾 Simpan Foto</button>
+
+                      <h4 id="profUsernameDisplay" class="text-2xl font-black text-sky-600 tracking-tight">@username</h4>
+                      <p id="profNameRoleDisplay" class="text-sm text-gray-500 font-medium mt-1">Nama Asli • Pelanggan</p>
                   </div>
+
                   <div class="space-y-6">
                       <div class="grid grid-cols-2 gap-4">
                           <div class="p-4 bg-gray-50 rounded-2xl">
                               <label class="text-[10px] font-bold text-gray-400 uppercase">Username</label>
-                              <div id="profUsername" class="font-bold">@naufal</div>
+                              <div id="profUsername" class="font-bold text-gray-800">@username</div>
                           </div>
                           <div class="p-4 bg-gray-50 rounded-2xl">
                               <label class="text-[10px] font-bold text-gray-400 uppercase">Nomor HP</label>
-                              <div id="profPhone" class="font-bold">0812345678</div>
+                              <div id="profPhone" class="font-bold text-gray-800">0812345678</div>
                           </div>
                       </div>
+                      
                       <div class="mt-8 border-t border-gray-100 pt-8">
                           <h4 class="text-lg font-bold mb-4 text-gray-800">Ubah Username</h4>
                           <div class="space-y-4 max-w-sm">
                               <div>
                                   <label class="text-xs font-bold text-gray-500 ml-1">Username Baru</label>
-                                  <input id="newUsernameInput" class="w-full bg-gray-50 border-0 rounded-2xl px-5 py-3.5 text-sm font-semibold focus:ring-2 focus:ring-sky-500 transition-all" placeholder="Ketik username baru..." />
+                                  <input id="newUsernameInput" class="w-full bg-gray-50 border-0 rounded-2xl px-5 py-3.5 text-sm font-semibold focus:ring-2 focus:ring-sky-500 transition-all outline-none" placeholder="Ketik username baru..." />
                               </div>
                               <div>
-                                  <label class="text-xs font-bold text-gray-500 ml-1">Password Saat Ini (Untuk Keamanan)</label>
-                                  <input id="confirmPasswordInput" type="password" class="w-full bg-gray-50 border-0 rounded-2xl px-5 py-3.5 text-sm font-semibold focus:ring-2 focus:ring-sky-500 transition-all" placeholder="••••••••" />
+                                  <label class="text-xs font-bold text-gray-500 ml-1">Password Saat Ini</label>
+                                  <input id="confirmPasswordInput" type="password" class="w-full bg-gray-50 border-0 rounded-2xl px-5 py-3.5 text-sm font-semibold focus:ring-2 focus:ring-sky-500 transition-all outline-none" placeholder="••••••••" />
                               </div>
-                              <button id="btnChangeUsername" class="w-full sm:w-auto bg-gray-900 hover:bg-black text-white px-6 py-3.5 rounded-2xl text-sm font-bold transition-all active:scale-95 shadow-lg shadow-gray-200">Simpan Username</button>
+                              <button id="btnChangeUsername" class="w-full sm:w-auto bg-gray-900 hover:bg-black text-white px-6 py-3.5 rounded-2xl text-sm font-bold transition-all active:scale-95 shadow-lg shadow-gray-200">Update Username</button>
                           </div>
                       </div>
                   </div>

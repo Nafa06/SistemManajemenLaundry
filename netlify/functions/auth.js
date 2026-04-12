@@ -49,6 +49,15 @@ exports.handler = async (event) => {
             return { statusCode: 200, body: JSON.stringify(updateRes.rows[0]) };
         }
 
+        // LOGIKA BARU: SIMPAN FOTO PROFIL PERMANEN
+        if (data.action === 'update_photo') {
+            const updateRes = await client.query(
+                'UPDATE users SET photo_url = $1 WHERE username = $2 RETURNING *',
+                [data.photo_url, data.username]
+            );
+            return { statusCode: 200, body: JSON.stringify(updateRes.rows[0]) };
+        }
+
         return { statusCode: 400, body: JSON.stringify({ error: 'Aksi tidak valid' }) };
 
     } catch (e) {
