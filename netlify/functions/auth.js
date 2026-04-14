@@ -16,6 +16,11 @@ exports.handler = async (event) => {
         await client.connect(); 
         const data = JSON.parse(event.body);
 
+        // Validasi Anti-Spasi untuk Username
+        if ((data.username && data.username.includes(' ')) || (data.newUsername && data.newUsername.includes(' '))) {
+            return { statusCode: 400, body: JSON.stringify({ error: 'Username tidak boleh mengandung spasi!' }) };
+        }
+
         if (data.action === 'register') {
             const res = await client.query(
                 'INSERT INTO users (username, password, name, phone, role) VALUES ($1, $2, $3, $4, $5) RETURNING *',
