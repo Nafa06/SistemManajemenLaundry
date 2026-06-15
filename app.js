@@ -54,8 +54,19 @@ window.toggleAuth = (isRegister) => {
 if(el('#regBtn')) {
     el('#regBtn').onclick = async () => {
         const user = { username: el('#regUser').value, password: el('#regPass').value, name: el('#regName').value, phone: el('#regPhone').value, role: 'Pelanggan' };
-        if(!user.username || !user.password || !user.name) { Swal.fire('Oops', 'Lengkapi semua data', 'warning'); return; }
         
+        // --- AWAL KODE VALIDASI ---
+        if(!user.username || !user.password || !user.name || !user.phone) { 
+            Swal.fire('Oops', 'Lengkapi semua data', 'warning'); return; 
+        }
+        if(user.password.length < 6) { 
+            Swal.fire('Validasi Gagal', 'Password minimal 6 karakter', 'error'); return; 
+        }
+        if(!/^[0-9]{10,14}$/.test(user.phone)) { 
+            Swal.fire('Validasi Gagal', 'Nomor WA harus berupa angka (10-14 digit)', 'error'); return; 
+        }
+        // --- AKHIR KODE VALIDASI ---
+
         setLoading(el('#regBtn'), true); // ⏳ Loading On
         try {
             const res = await fetch('/.netlify/functions/auth', { method: 'POST', body: JSON.stringify({ action: 'register', ...user }) });
@@ -246,7 +257,21 @@ if(el('#calcPreview')) el('#calcPreview').addEventListener('click', ()=>{
 if(el('#submitLaundry')) {
     el('#submitLaundry').addEventListener('click', async ()=>{
         const nm=el('#lndName').value, ct=el('#lndContact').value, sv=el('#lndService').value, qt=el('#lndQty').value, ds=el('#lndDesc').value;
-        if(!nm || !qt){ Swal.fire('Oops', 'Data tidak lengkap', 'warning'); return; }
+        
+        // --- AWAL KODE VALIDASI ---
+        if(!nm || !ct || !qt){ 
+            Swal.fire('Oops', 'Data Nama, No WA, dan Berat wajib diisi', 'warning'); return; 
+        }
+        if(!/^[A-Za-z\s]+$/.test(nm)) { 
+            Swal.fire('Validasi Gagal', 'Nama pemesan hanya boleh berisi huruf', 'error'); return; 
+        }
+        if(!/^[0-9]{10,14}$/.test(ct)) { 
+            Swal.fire('Validasi Gagal', 'Nomor WA harus berupa angka (10-14 digit)', 'error'); return; 
+        }
+        if(parseFloat(qt) <= 0) { 
+            Swal.fire('Validasi Gagal', 'Berat / Qty harus lebih dari 0', 'error'); return; 
+        }
+        // --- AKHIR KODE VALIDASI ---
         
         setLoading(el('#submitLaundry'), true); // ⏳ Loading On
         try {
@@ -326,7 +351,15 @@ if(el('#submitPaymentProof')) {
     el('#submitPaymentProof').onclick = async () => {
         const id = el('#payModal').dataset.trxId;
         const method = el('#payMethodInput').value, sender = el('#paySenderInput').value;
-        if(!sender){ Swal.fire('Oops','Isi nama pengirim','warning'); return; }
+        
+        // --- AWAL KODE VALIDASI ---
+        if(!sender){ 
+            Swal.fire('Oops','Isi nama pengirim','warning'); return; 
+        }
+        if(!/^[A-Za-z\s]+$/.test(sender)) { 
+            Swal.fire('Validasi Gagal', 'Nama pengirim hanya boleh berisi huruf', 'error'); return; 
+        }
+        // --- AKHIR KODE VALIDASI ---
         
         setLoading(el('#submitPaymentProof'), true); // ⏳ Loading On
         try {
