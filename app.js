@@ -65,6 +65,9 @@ if(el('#regBtn')) {
         if(!/^[0-9]{10,14}$/.test(user.phone)) { 
             Swal.fire('Validasi Gagal', 'Nomor WA harus berupa angka (10-14 digit)', 'error'); return; 
         }
+        if(!/^[A-Za-z\s]+$/.test(user.name)) { 
+            Swal.fire('Validasi Gagal', 'Nama lengkap hanya boleh berisi huruf', 'error'); return; 
+        }
         // --- AKHIR KODE VALIDASI ---
 
         setLoading(el('#regBtn'), true); // ⏳ Loading On
@@ -165,6 +168,14 @@ let pendingPhotoBase64 = null;
 if(el('#photoUpload')){
     el('#photoUpload').onchange = (e) => {
         const file = e.target.files[0]; if(!file) return;
+
+        const validTypes = ['image/jpeg', 'image/png', 'image/jpg'];
+        if (!validTypes.includes(file.type)) {
+            Swal.fire('Validasi Gagal', 'Format foto harus berupa JPG atau PNG!', 'error');
+            e.target.value = '';
+            return;
+        }
+
         if(file.size > 2 * 1024 * 1024) { Swal.fire('Oops', 'Ukuran foto maksimal 2MB ya!', 'warning'); return; }
 
         const reader = new FileReader();
